@@ -77,15 +77,16 @@ export function Header() {
 
       <div className="border-t border-line">
         <nav aria-label="Categorias rápidas" className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-2 text-[13px]">
-          <button
-            type="button"
-            aria-haspopup="true"
-            aria-expanded="false"
-            aria-label="Todos os departamentos"
-            className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 font-semibold text-cream"
+          {/* A real <button aria-haspopup> promising a mega menu that never opens would
+              be a false affordance for screen reader users - since there's no real
+              menu to open (see the category note below), this is a plain link instead,
+              consistent with the department links right after it. */}
+          <Link
+            href="/produtos"
+            className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 font-semibold text-cream hover:border-gold"
           >
             ☰ Todos os Departamentos
-          </button>
+          </Link>
           {/* Links to the unfiltered catalog, not to a real per-category filter - the
               actual Product model has no category field yet (see docs/PLANO_REDESIGN.md). */}
           {DEPARTMENTS.map((dept) => (

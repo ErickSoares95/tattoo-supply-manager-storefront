@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import { createOrder } from "@/lib/api/orders";
@@ -20,6 +20,18 @@ export function CartDrawer() {
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // WAI-ARIA authoring practices for a modal dialog: Escape must dismiss it. role="dialog"
+  // aria-modal="true" alone doesn't give this for free - the browser does nothing special
+  // with Escape, the app has to handle it.
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") close();
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, close]);
 
   async function handleCheckout() {
     if (!isAuthenticated || !token) {
