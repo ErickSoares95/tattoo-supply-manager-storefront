@@ -15,6 +15,13 @@ interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  /** True until localStorage hydration (see AuthProvider) has run once. Pages that
+   * gate access on isAuthenticated (e.g. /pedidos) must wait for this to go false
+   * before redirecting - otherwise they see the pre-hydration isAuthenticated=false
+   * and redirect a logged-in user to /login. React fires effects bottom-up, so a
+   * page's own effect runs before this provider's hydration effect (the provider is
+   * an ancestor) - the race is real, not hypothetical. */
+  isLoading: boolean;
   login: (payload: LoginRequest) => Promise<void>;
   logout: () => void;
 }
@@ -26,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // mismatch), then hydrate from localStorage in the effect below, client-only.
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Sanctioned exception to react-hooks/set-state-in-effect: this is hydrating from
@@ -39,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser) as AuthUser);
     }
+    setIsLoading(false);
   }, []);
 
   async function login(payload: LoginRequest) {
@@ -63,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
