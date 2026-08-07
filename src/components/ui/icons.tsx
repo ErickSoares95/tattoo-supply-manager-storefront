@@ -69,6 +69,15 @@ export function BagIcon(props: IconProps) {
   );
 }
 
+export function CameraIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" />
+      <circle cx="12" cy="13.5" r="3.2" />
+    </svg>
+  );
+}
+
 export function WingLogo(props: IconProps) {
   return (
     <svg viewBox="0 0 100 100" role="img" aria-hidden="true" {...props}>
