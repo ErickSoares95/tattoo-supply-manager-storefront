@@ -10,9 +10,11 @@ const DEPARTMENTS = [
   "Acessórios",
 ];
 
-// Foundation step only: this is presentational markup ported from the mockup, no
-// interactivity yet (search/mega menu/cart are wired up once /produtos and the cart
-// state exist in later steps) - that's why it's a Server Component, no "use client".
+// Server Component still - no "use client" needed. The search box is a real <form
+// action="/produtos"> with a plain GET input named "name": the browser turns that into
+// a "/produtos?name=..." navigation on its own, no JS/client state required at all.
+// The mega menu is still inert (department links have nowhere real to filter by - the
+// real Product model has no category field, see docs/PLANO_REDESIGN.md).
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg">
@@ -28,7 +30,11 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-2.5">
-          <div role="search" className="hidden items-center overflow-hidden rounded-full border border-line bg-bg-card md:flex">
+          <form
+            action="/produtos"
+            role="search"
+            className="hidden items-center overflow-hidden rounded-full border border-line bg-bg-card md:flex"
+          >
             <label htmlFor="dept-select" className="visually-hidden">
               Selecionar departamento
             </label>
@@ -48,14 +54,15 @@ export function Header() {
             </label>
             <input
               id="search-input"
+              name="name"
               type="text"
               placeholder="Buscar máquinas, tintas, agulhas..."
               className="min-w-[220px] bg-transparent px-3 py-2.5 text-[13.5px] text-cream outline-none placeholder:text-muted"
             />
-            <button type="button" aria-label="Buscar" className="m-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-bg">
+            <button type="submit" aria-label="Buscar" className="m-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-bg">
               <SearchIcon />
             </button>
-          </div>
+          </form>
 
           <button type="button" aria-label="Minha conta" className="flex items-center justify-center rounded-full p-2 text-cream hover:bg-gold/10 hover:text-gold-light">
             <UserIcon className="h-5 w-5" />
@@ -86,10 +93,12 @@ export function Header() {
           >
             ☰ Todos os Departamentos
           </button>
+          {/* Links to the unfiltered catalog, not to a real per-category filter - the
+              actual Product model has no category field yet (see docs/PLANO_REDESIGN.md). */}
           {DEPARTMENTS.map((dept) => (
-            <a key={dept} href="#" className="text-muted hover:text-gold-light">
+            <Link key={dept} href="/produtos" className="text-muted hover:text-gold-light">
               {dept}
-            </a>
+            </Link>
           ))}
           <a href="#destaques" className="text-muted hover:text-gold-light">
             Destaques

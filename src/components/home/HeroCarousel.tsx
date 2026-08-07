@@ -21,7 +21,7 @@ const SLIDES: Slide[] = [
     ),
     sub: "Máquinas, tintas, agulhas e descartáveis das marcas mais procuradas — selecionados pela Vanessa Gazanez.",
     ctas: [
-      { label: "Ver todos os produtos", href: "#produtos", variant: "gold" },
+      { label: "Ver todos os produtos", href: "/produtos", variant: "gold" },
       { label: "Mais vendidos da semana", href: "#destaques", variant: "outline" },
     ],
     gradient: "radial-gradient(ellipse at 30% 20%, rgba(201,162,74,.25), transparent 55%), linear-gradient(135deg, #0c0a08, #000)",
@@ -45,7 +45,7 @@ const SLIDES: Slide[] = [
       </>
     ),
     sub: "Em compras acima de R$ 350, sem cupom, sem pegadinha.",
-    ctas: [{ label: "Comprar agora", href: "#produtos", variant: "gold" }],
+    ctas: [{ label: "Comprar agora", href: "/produtos", variant: "gold" }],
     gradient: "radial-gradient(ellipse at 50% 20%, rgba(201,162,74,.2), transparent 55%), linear-gradient(135deg, #100d0b, #000)",
   },
 ];

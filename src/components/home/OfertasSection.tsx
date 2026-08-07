@@ -21,7 +21,7 @@ export function OfertasSection() {
         ))}
       </div>
 
-      <a href="#produtos" className="mt-5 block text-center text-[13.5px] font-semibold text-gold-light hover:underline">
+      <a href="/produtos" className="mt-5 block text-center text-[13.5px] font-semibold text-gold-light hover:underline">
         Ver todos os produtos →
       </a>
     </section>
