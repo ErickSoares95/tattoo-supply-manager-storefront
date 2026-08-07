@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { BagIcon, HeartIcon, SearchIcon, UserIcon, WingLogo } from "@/components/ui/icons";
+import { CartButton } from "@/components/cart/CartButton";
+import { HeartIcon, SearchIcon, UserIcon, WingLogo } from "@/components/ui/icons";
 
 const DEPARTMENTS = [
   "Máquinas",
@@ -72,13 +73,7 @@ export function Header() {
             <HeartIcon className="h-5 w-5" />
             <span className="visually-hidden">Desejos</span>
           </button>
-          <button type="button" aria-label="Abrir carrinho de compras" className="relative flex items-center justify-center rounded-full p-2 text-cream hover:bg-gold/10 hover:text-gold-light">
-            <BagIcon className="h-5 w-5" />
-            <span className="visually-hidden">Carrinho</span>
-            <span aria-hidden className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-bg">
-              0
-            </span>
-          </button>
+          <CartButton />
         </div>
       </div>
 

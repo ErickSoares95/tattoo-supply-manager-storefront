@@ -3,6 +3,13 @@ import type { PageResponse, ProductResponse } from "@/lib/api/types";
 
 export const PAGE_SIZE = 6;
 
+// No real "slug" field on the backend Product entity (only id/name/description/price/
+// stock) - /produto/[id] uses the numeric id directly rather than adding a slug column
+// just for this. A real SEO slug is a legitimate future improvement, not done here.
+export function fetchProductById(id: number): Promise<ProductResponse> {
+  return apiFetch<ProductResponse>(`/products/${id}`, { cache: "no-store" });
+}
+
 export interface ProductQuery {
   name?: string;
   minPrice?: number;

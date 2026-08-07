@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { TopBar } from "@/components/layout/TopBar";
+import { AuthProvider } from "@/lib/store/AuthContext";
+import { CartProvider } from "@/lib/store/CartContext";
 import "./globals.css";
 
 // next/font self-hosts and subsets at build time (no request to Google Fonts at
@@ -31,13 +34,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="flex min-h-screen flex-col font-sans antialiased">
-        <SkipLink />
-        <TopBar />
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <CartProvider>
+            <SkipLink />
+            <TopBar />
+            <Header />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+            <CartDrawer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
