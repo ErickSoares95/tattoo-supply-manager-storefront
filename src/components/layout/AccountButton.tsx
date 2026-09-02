@@ -23,7 +23,7 @@ export function AccountButton() {
   return (
     <div className="flex items-center gap-1.5">
       {user?.userType === "ADMIN" && (
-        <Link href="/admin" className="hidden text-xs text-muted hover:text-gold-light md:inline">
+        <Link href="/admin" className="hidden text-xs text-muted hover:text-gold-light sm:inline">
           Painel admin
         </Link>
       )}
@@ -35,11 +35,9 @@ export function AccountButton() {
       >
         <UserIcon className="h-5 w-5" />
       </Link>
-      <button
-        type="button"
-        onClick={logout}
-        className="hidden text-xs text-muted hover:text-gold-light md:inline"
-      >
+      {/* Was hidden below md - on mobile that left no way to log out from the header at
+          all (not degraded, absent), same class of bug as the search form above. */}
+      <button type="button" onClick={logout} className="text-xs text-muted hover:text-gold-light">
         Sair
       </button>
     </div>

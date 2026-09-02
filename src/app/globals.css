@@ -71,6 +71,22 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* High contrast toggle (accessibility, step 6 part 2) - overrides the same custom
+   properties every component already reads through @theme inline above, so this is the
+   only place contrast needs to be defined; no component-level changes needed. */
+:root[data-contrast="high"] {
+  --bg: #000000;
+  --bg-card: #000000;
+  --gold: #ffd75e;
+  --gold-light: #fff0bd;
+  --gold-dark: #ffd75e;
+  --cream: #ffffff;
+  --muted: #e5e5e5;
+  --line: #ffffff;
+  --danger: #ff8a80;
+  --ok: #7ee08a;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

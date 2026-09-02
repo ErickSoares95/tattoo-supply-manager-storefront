@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { TopBar } from "@/components/layout/TopBar";
+import { AccessibilityProvider } from "@/lib/store/AccessibilityContext";
 import { AuthProvider } from "@/lib/store/AuthContext";
 import { CartProvider } from "@/lib/store/CartContext";
 import "./globals.css";
@@ -34,18 +35,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${cormorant.variable} ${inter.variable}`}>
       <body className="flex min-h-screen flex-col font-sans antialiased">
-        <AuthProvider>
-          <CartProvider>
-            <SkipLink />
-            <TopBar />
-            <Header />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <Footer />
-            <CartDrawer />
-          </CartProvider>
-        </AuthProvider>
+        <AccessibilityProvider>
+          <AuthProvider>
+            <CartProvider>
+              <SkipLink />
+              <TopBar />
+              <Header />
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <CartDrawer />
+            </CartProvider>
+          </AuthProvider>
+        </AccessibilityProvider>
       </body>
     </html>
   );

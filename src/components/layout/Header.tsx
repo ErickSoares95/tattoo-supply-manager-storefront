@@ -23,7 +23,12 @@ export function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3.5">
         <Link href="/" aria-label="Vanessa Gazanez Tattoo — página inicial" className="flex shrink-0 items-center gap-3">
           <WingLogo className="h-[46px] w-[46px] text-gold" />
-          <span className="leading-tight">
+          {/* Name + subtitle only from sm up - at narrower widths the two icon groups
+              either side already eat most of a 375px viewport, and stacking gold text
+              inside a shrink-0 flex item just pushes total row width past the screen
+              (real horizontal-scroll bug, not a hypothetical one - the wing icon alone
+              keeps the link's accessible name via aria-label above). */}
+          <span className="hidden leading-tight sm:block">
             <span className="block font-serif text-[22px] font-bold tracking-wide text-gold-light whitespace-nowrap">
               Vanessa Gazanez
             </span>
@@ -74,6 +79,28 @@ export function Header() {
           <CartButton />
         </div>
       </div>
+
+      {/* Mobile-only search row - the desktop form above is `hidden` below md, and
+          without this there was no way at all to search on a phone (not degraded, just
+          absent). No department select here on purpose: keeping it to a single input
+          is what makes it fit next to nothing else competing for width. */}
+      <form action="/produtos" role="search" className="border-t border-line px-5 py-2.5 md:hidden">
+        <label htmlFor="search-input-mobile" className="visually-hidden">
+          Buscar produtos
+        </label>
+        <div className="flex items-center overflow-hidden rounded-full border border-line bg-bg-card">
+          <input
+            id="search-input-mobile"
+            name="name"
+            type="text"
+            placeholder="Buscar máquinas, tintas, agulhas..."
+            className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 text-[13.5px] text-cream outline-none placeholder:text-muted"
+          />
+          <button type="submit" aria-label="Buscar" className="m-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-bg">
+            <SearchIcon />
+          </button>
+        </div>
+      </form>
 
       <div className="border-t border-line">
         <nav aria-label="Categorias rápidas" className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-2 text-[13px]">

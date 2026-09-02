@@ -1,6 +1,5 @@
-// The mockup's a11y controls (font size +/-, high contrast toggle) do need client-side
-// state - deliberately left as inert buttons for now (foundation step has no
-// functionality yet), real behavior comes back in step 6 (accessibility polish).
+import { AccessibilityControls } from "@/components/layout/AccessibilityControls";
+
 export function Footer() {
   return (
     <footer id="contato" className="mt-auto border-t border-line">
@@ -46,17 +45,7 @@ export function Footer() {
 
         <div>
           <h4 className="font-serif text-lg font-semibold text-gold-light">Acessibilidade</h4>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" aria-label="Aumentar tamanho da fonte" className="rounded-full border border-line px-3 py-1.5 text-sm text-cream hover:border-gold">
-              A+
-            </button>
-            <button type="button" aria-label="Diminuir tamanho da fonte" className="rounded-full border border-line px-3 py-1.5 text-sm text-cream hover:border-gold">
-              A-
-            </button>
-            <button type="button" aria-label="Alternar alto contraste" className="rounded-full border border-line px-3 py-1.5 text-sm text-cream hover:border-gold">
-              Alto contraste
-            </button>
-          </div>
+          <AccessibilityControls />
           <p className="mt-3 text-xs text-muted">
             Site compatível com leitores de tela e navegação por teclado.
           </p>
