@@ -6,8 +6,9 @@ import { ApiError } from "@/lib/api/client";
 import { createProduct, fetchProductById, updateProductAdmin } from "@/lib/api/products";
 import type { ProductPayload } from "@/lib/api/types";
 import { useAuth } from "@/lib/store/AuthContext";
+import { ProductImage } from "@/components/shop/ProductImage";
 
-const EMPTY_FORM: ProductPayload = { name: "", description: "", price: 0, stock: 0 };
+const EMPTY_FORM: ProductPayload = { name: "", description: "", price: 0, stock: 0, imageUrl: "" };
 
 const FIELD_CLASS =
   "rounded-md border border-line bg-bg px-3 py-2 text-cream outline-none focus-visible:border-gold";
@@ -35,6 +36,7 @@ export function ProductForm({ productId }: { productId?: number }) {
           description: product.description ?? "",
           price: product.price,
           stock: product.stock,
+          imageUrl: product.imageUrl ?? "",
         }),
       )
       .catch((err) => setError(err instanceof ApiError ? err.message : "Não foi possível carregar o produto."))
@@ -115,6 +117,23 @@ export function ProductForm({ productId }: { productId?: number }) {
           className={FIELD_CLASS}
         />
       </label>
+
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        URL da imagem
+        <input
+          type="url"
+          placeholder="https://..."
+          value={form.imageUrl ?? ""}
+          onChange={handleChange("imageUrl")}
+          className={FIELD_CLASS}
+        />
+      </label>
+
+      {form.imageUrl && (
+        <div className="w-40 overflow-hidden rounded-md border border-line">
+          <ProductImage src={form.imageUrl} alt="Pré-visualização" />
+        </div>
+      )}
 
       {error && <p className="text-sm text-danger">{error}</p>}
 

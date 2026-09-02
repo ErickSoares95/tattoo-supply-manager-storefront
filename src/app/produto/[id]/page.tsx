@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api/client";
 import { fetchProductById } from "@/lib/api/products";
 import { splitPrice } from "@/lib/format";
 import { AddToCartForm } from "@/components/shop/AddToCartForm";
-import { ProductImagePlaceholder } from "@/components/shop/ProductImagePlaceholder";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 interface ProdutoPageProps {
   params: Promise<{ id: string }>;
@@ -49,7 +49,7 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div className="overflow-hidden rounded-[10px] border border-line">
-          <ProductImagePlaceholder />
+          <ProductImage src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
         </div>
 
         <div>
