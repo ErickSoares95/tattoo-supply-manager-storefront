@@ -14,7 +14,7 @@ import { useCart } from "@/lib/store/CartContext";
 // failing silently.
 export function CartDrawer() {
   const { items, isOpen, close, removeItem, updateQuantity, subtotal, clear } = useCart();
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   const [placing, setPlacing] = useState(false);
@@ -51,6 +51,16 @@ export function CartDrawer() {
       clear();
       setSuccess(true);
     } catch (err) {
+      // Same stale-token case as /pedidos (see that page's comment): a leftover token
+      // from an old session looks authenticated client-side but the backend rejects it.
+      // Without this, checkout just failed with a generic error and the user stayed
+      // stuck "logged in" with no way to tell why.
+      if (err instanceof ApiError && err.status === 401) {
+        logout();
+        close();
+        router.push("/login?redirect=carrinho");
+        return;
+      }
       setError(err instanceof ApiError ? err.message : "Não foi possível finalizar a compra.");
     } finally {
       setPlacing(false);
