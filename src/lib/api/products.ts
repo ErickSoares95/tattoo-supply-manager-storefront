@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api/client";
-import type { PageResponse, ProductResponse } from "@/lib/api/types";
+import type { PageResponse, ProductPayload, ProductResponse } from "@/lib/api/types";
 
 export const PAGE_SIZE = 6;
 
@@ -17,6 +17,9 @@ export interface ProductQuery {
   inStockOnly?: boolean;
   sort?: "price-asc" | "price-desc" | "name-asc";
   page?: number;
+  /** Overrides PAGE_SIZE - used by the admin product list, which wants "all of them
+   * on one page" rather than the storefront catalog's 6-per-page grid. */
+  size?: number;
 }
 
 // GET /products?name=&minPrice=&maxPrice=&minStock=&page=&size=&sort= - matches
@@ -30,7 +33,7 @@ export function fetchProducts(query: ProductQuery): Promise<PageResponse<Product
   if (query.inStockOnly) params.set("minStock", "1");
 
   params.set("page", String(query.page ?? 0));
-  params.set("size", String(PAGE_SIZE));
+  params.set("size", String(query.size ?? PAGE_SIZE));
 
   if (query.sort === "price-asc") params.set("sort", "price,asc");
   if (query.sort === "price-desc") params.set("sort", "price,desc");
@@ -40,5 +43,36 @@ export function fetchProducts(query: ProductQuery): Promise<PageResponse<Product
     // Product listings change often enough (stock, new items) that a static/cached
     // fetch would go stale fast - always hit the backend fresh for this one.
     cache: "no-store",
+  });
+}
+
+// --- Admin CRUD (POST/PUT/DELETE /products/{id} are ADMIN-only on the backend; GET is
+// public since tattoo-supply-manager#034, so listing for the admin table reuses
+// fetchProducts above with a large page size instead of a separate endpoint). ---
+
+export function fetchAllProductsForAdmin(): Promise<PageResponse<ProductResponse>> {
+  return fetchProducts({ page: 0, size: 100, sort: "name-asc" });
+}
+
+export function createProduct(payload: ProductPayload, token: string): Promise<ProductResponse> {
+  return apiFetch<ProductResponse>("/products", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateProductAdmin(id: number, payload: ProductPayload, token: string): Promise<ProductResponse> {
+  return apiFetch<ProductResponse>(`/products/${id}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteProduct(id: number, token: string): Promise<void> {
+  return apiFetch<void>(`/products/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
   });
 }

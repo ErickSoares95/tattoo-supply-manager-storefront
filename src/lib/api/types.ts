@@ -20,6 +20,29 @@ export interface PageResponse<T> {
 }
 
 export type UserType = "ADMIN" | "CLIENT" | "ATTENDANT";
+export type UserStatus = "ACTIVE" | "BLOCKED";
+
+// Same shape for create and update on the backend (ProductRequest/UpdateProductRequest
+// are two records but field-for-field identical) - one payload type covers both here.
+export interface ProductPayload {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+}
+
+// Matches UpdateUserRequest exactly - admin edits go through PUT /users/{id}, a full
+// replacement (not a patch), so every field the backend requires has to be sent even
+// when only one of them actually changed.
+export interface UpdateUserRequest {
+  username: string;
+  fullName: string;
+  phoneNumber: string | null;
+  cpf: string | null;
+  imageUrl: string | null;
+  userType: UserType;
+  userStatus: UserStatus;
+}
 
 export interface LoginRequest {
   /** Accepts either email or CPF - see tattoo-supply-manager#031. */
@@ -50,7 +73,7 @@ export interface UserResponse {
   username: string;
   email: string;
   fullName: string;
-  userStatus: "ACTIVE" | "BLOCKED";
+  userStatus: UserStatus;
   userType: UserType;
   phoneNumber: string | null;
   cpf: string | null;

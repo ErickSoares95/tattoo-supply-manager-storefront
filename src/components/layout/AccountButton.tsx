@@ -22,6 +22,11 @@ export function AccountButton() {
 
   return (
     <div className="flex items-center gap-1.5">
+      {user?.userType === "ADMIN" && (
+        <Link href="/admin" className="hidden text-xs text-muted hover:text-gold-light md:inline">
+          Painel admin
+        </Link>
+      )}
       <Link
         href="/pedidos"
         aria-label={`Meus pedidos (${user?.fullName})`}

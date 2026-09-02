@@ -25,5 +25,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new ApiError(body?.message ?? `Request failed with status ${response.status}`, response.status);
   }
 
-  return response.json() as Promise<T>;
+  // Checking response.status === 204 alone isn't enough: POST /notifications/reprocess
+  // replies 200 with an empty body (ResponseEntity.ok().build(), no .body(...)), not
+  // 204 - found live by clicking "Reprocessar" in the admin panel, where the backend
+  // logged a clean 200 but the UI still showed a generic failure because .json() threw
+  // on the empty string. Reading as text first and treating "no text" as "no body",
+  // regardless of which 2xx status sent it, covers both cases with one check.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
