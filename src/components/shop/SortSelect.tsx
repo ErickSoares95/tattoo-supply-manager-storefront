@@ -2,8 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+// "" is the default (no explicit ?sort= in the URL) - fetchProducts resolves that to
+// "mais vendido primeiro" server-side, so this list doesn't need its own separate
+// "bestselling" entry that would just duplicate what "" already does.
 const OPTIONS = [
-  { value: "", label: "Relevância" },
+  { value: "", label: "Mais vendidos" },
   { value: "price-asc", label: "Preço: menor para maior" },
   { value: "price-desc", label: "Preço: maior para menor" },
   { value: "name-asc", label: "Nome: A-Z" },

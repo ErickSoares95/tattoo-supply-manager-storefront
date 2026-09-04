@@ -3,11 +3,12 @@ import { CatalogProductCard } from "@/components/shop/CatalogProductCard";
 
 // Real data now (was lib/data/products.ts mock array + a client-side "Mais vendidos /
 // Novidades" tab toggle before). Dropped the tabs along with the mock data: the real
-// Product has no bestseller/isNew flag to filter by, and with only a handful of real
-// products splitting them into two tabs added no value anyway. This is just the real
-// catalog, same CatalogProductCard (and real "Adicionar ao carrinho") as /produtos.
+// Product has no bestseller/isNew flag to filter by. "Destaques da loja" is now
+// literally the top 5 real best-sellers (units sold across all orders, see
+// ProductResponse.unitsSold) - same CatalogProductCard (and real "Adicionar ao
+// carrinho") as /produtos.
 export async function DestaquesSection() {
-  const page = await fetchProducts({ size: 100 });
+  const page = await fetchProducts({ sort: "bestselling", size: 5 });
   const list = page.content;
 
   return (

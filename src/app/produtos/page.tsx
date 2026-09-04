@@ -14,9 +14,9 @@ interface ProdutosPageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
 
-// Step 3/6 of the redesign: real catalog, replacing lib/data/products.ts (mock, still
-// used by the home page's Ofertas/Destaques sections). Filters/sort/pagination all
-// live in the URL, fetched here on the server - no client-side data fetching at all.
+// Real catalog. Filters/sort/pagination all live in the URL, fetched here on the
+// server - no client-side data fetching at all. Default sort (no ?sort= param) is
+// "mais vendido primeiro" - see fetchProducts.
 export default async function ProdutosPage({ searchParams }: ProdutosPageProps) {
   const params = await searchParams;
 
@@ -25,7 +25,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     inStockOnly: params.inStockOnly === "true",
-    sort: params.sort as "price-asc" | "price-desc" | "name-asc" | undefined,
+    sort: params.sort as "bestselling" | "price-asc" | "price-desc" | "name-asc" | undefined,
     page: params.page ? Number(params.page) : 0,
   });
 

@@ -7,7 +7,7 @@ import { CatalogProductCard } from "@/components/shop/CatalogProductCard";
 // "-14%" badge with, so this section is just the real catalog filtered down, same
 // CatalogProductCard (and real "Adicionar ao carrinho") as /produtos.
 export async function OfertasSection() {
-  const page = await fetchProducts({ size: 100 });
+  const page = await fetchProducts({ sort: "bestselling", size: 100 });
   const deals = page.content.filter((product) => product.onDeal);
 
   if (deals.length === 0) return null;

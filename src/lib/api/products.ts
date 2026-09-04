@@ -15,7 +15,7 @@ export interface ProductQuery {
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
-  sort?: "price-asc" | "price-desc" | "name-asc";
+  sort?: "bestselling" | "price-asc" | "price-desc" | "name-asc";
   page?: number;
   /** Overrides PAGE_SIZE - used by the admin product list, which wants "all of them
    * on one page" rather than the storefront catalog's 6-per-page grid. */
@@ -35,9 +35,14 @@ export function fetchProducts(query: ProductQuery): Promise<PageResponse<Product
   params.set("page", String(query.page ?? 0));
   params.set("size", String(query.size ?? PAGE_SIZE));
 
+  // Default (no explicit sort choice) is "mais vendido primeiro" - unitsSold isn't a
+  // real Product column, FindAllProductsService special-cases this sort key and
+  // resolves it in memory instead of pushing it down to the database (see that
+  // service's comment on why).
   if (query.sort === "price-asc") params.set("sort", "price,asc");
-  if (query.sort === "price-desc") params.set("sort", "price,desc");
-  if (query.sort === "name-asc") params.set("sort", "name,asc");
+  else if (query.sort === "price-desc") params.set("sort", "price,desc");
+  else if (query.sort === "name-asc") params.set("sort", "name,asc");
+  else params.set("sort", "unitsSold,desc");
 
   return apiFetch<PageResponse<ProductResponse>>(`/products?${params.toString()}`, {
     // Product listings change often enough (stock, new items) that a static/cached

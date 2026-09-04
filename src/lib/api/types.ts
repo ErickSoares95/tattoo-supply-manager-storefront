@@ -14,6 +14,11 @@ export interface ProductResponse {
    * oldPrice/discount field exists; this only decides which real products show up
    * there, it doesn't fabricate a price cut. */
   onDeal: boolean;
+  /** Total quantity sold across ALL orders, regardless of payment status (see
+   * ProductResponse.unitsSold on the backend - deliberately not the same "sales"
+   * concept as the admin sales report, which requires an approved payment). Drives
+   * "mais vendido" ordering on /produtos and "Destaques da loja" on the home page. */
+  unitsSold: number;
 }
 
 // Spring Data's Page<T> JSON shape.
