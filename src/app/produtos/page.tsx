@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { fetchProducts } from "@/lib/api/products";
+import type { ProductCategoryValue } from "@/lib/constants/categories";
 import { CatalogProductCard } from "@/components/shop/CatalogProductCard";
 import { FiltersPanel } from "@/components/shop/FiltersPanel";
 import { Pagination } from "@/components/shop/Pagination";
@@ -25,6 +26,7 @@ export default async function ProdutosPage({ searchParams }: ProdutosPageProps) 
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     inStockOnly: params.inStockOnly === "true",
+    category: params.category as ProductCategoryValue | undefined,
     sort: params.sort as "bestselling" | "price-asc" | "price-desc" | "name-asc" | undefined,
     page: params.page ? Number(params.page) : 0,
   });

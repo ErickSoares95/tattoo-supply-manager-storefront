@@ -1,23 +1,15 @@
 import Link from "next/link";
 import { CartButton } from "@/components/cart/CartButton";
 import { AccountButton } from "@/components/layout/AccountButton";
+import { DepartmentMenu } from "@/components/layout/DepartmentMenu";
 import { SearchIcon, WingLogo } from "@/components/ui/icons";
 import { WishlistHeaderButton } from "@/components/shop/WishlistHeaderButton";
+import { PRODUCT_CATEGORIES } from "@/lib/constants/categories";
 
-const DEPARTMENTS = [
-  "Máquinas",
-  "Agulhas",
-  "Tintas",
-  "Descartáveis",
-  "Cuidados pós-tattoo",
-  "Acessórios",
-];
-
-// Server Component still - no "use client" needed. The search box is a real <form
-// action="/produtos"> with a plain GET input named "name": the browser turns that into
-// a "/produtos?name=..." navigation on its own, no JS/client state required at all.
-// The mega menu is still inert (department links have nowhere real to filter by - the
-// real Product model has no category field, see docs/PLANO_REDESIGN.md).
+// Server Component still - no "use client" needed (DepartmentMenu, the one interactive
+// piece, is its own Client Component). The search box is a real <form action="/produtos">
+// with plain GET inputs (name="name", name="category"): the browser turns that into a
+// "/produtos?name=...&category=..." navigation on its own, no JS/client state required.
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-bg">
@@ -48,13 +40,16 @@ export function Header() {
             </label>
             <select
               id="dept-select"
+              name="category"
               aria-label="Departamento"
               className="border-r border-line bg-transparent px-3 py-2.5 text-[13px] text-muted outline-none"
               defaultValue=""
             >
               <option value="">Todos</option>
-              {DEPARTMENTS.map((dept) => (
-                <option key={dept}>{dept}</option>
+              {PRODUCT_CATEGORIES.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
               ))}
             </select>
             <label htmlFor="search-input" className="visually-hidden">
@@ -102,23 +97,7 @@ export function Header() {
 
       <div className="border-t border-line">
         <nav aria-label="Categorias rápidas" className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-2 text-[13px]">
-          {/* A real <button aria-haspopup> promising a mega menu that never opens would
-              be a false affordance for screen reader users - since there's no real
-              menu to open (see the category note below), this is a plain link instead,
-              consistent with the department links right after it. */}
-          <Link
-            href="/produtos"
-            className="flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 font-semibold text-cream hover:border-gold"
-          >
-            ☰ Todos os Departamentos
-          </Link>
-          {/* Links to the unfiltered catalog, not to a real per-category filter - the
-              actual Product model has no category field yet (see docs/PLANO_REDESIGN.md). */}
-          {DEPARTMENTS.map((dept) => (
-            <Link key={dept} href="/produtos" className="text-muted hover:text-gold-light">
-              {dept}
-            </Link>
-          ))}
+          <DepartmentMenu />
           <a href="#destaques" className="text-muted hover:text-gold-light">
             Destaques
           </a>

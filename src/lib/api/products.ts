@@ -1,7 +1,8 @@
 import { apiFetch } from "@/lib/api/client";
+import type { ProductCategoryValue } from "@/lib/constants/categories";
 import type { PageResponse, ProductPayload, ProductResponse } from "@/lib/api/types";
 
-export const PAGE_SIZE = 6;
+export const PAGE_SIZE = 20;
 
 // No real "slug" field on the backend Product entity (only id/name/description/price/
 // stock) - /produto/[id] uses the numeric id directly rather than adding a slug column
@@ -15,15 +16,16 @@ export interface ProductQuery {
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
+  category?: ProductCategoryValue;
   sort?: "bestselling" | "price-asc" | "price-desc" | "name-asc";
   page?: number;
   /** Overrides PAGE_SIZE - used by the admin product list, which wants "all of them
-   * on one page" rather than the storefront catalog's 6-per-page grid. */
+   * on one page" rather than the storefront catalog's 20-per-page grid. */
   size?: number;
 }
 
-// GET /products?name=&minPrice=&maxPrice=&minStock=&page=&size=&sort= - matches
-// ProductFilterRequest + Pageable exactly (see backend's ProductController).
+// GET /products?name=&minPrice=&maxPrice=&minStock=&category=&page=&size=&sort= -
+// matches ProductFilterRequest + Pageable exactly (see backend's ProductController).
 export function fetchProducts(query: ProductQuery): Promise<PageResponse<ProductResponse>> {
   const params = new URLSearchParams();
 
@@ -31,6 +33,7 @@ export function fetchProducts(query: ProductQuery): Promise<PageResponse<Product
   if (query.minPrice !== undefined) params.set("minPrice", String(query.minPrice));
   if (query.maxPrice !== undefined) params.set("maxPrice", String(query.maxPrice));
   if (query.inStockOnly) params.set("minStock", "1");
+  if (query.category) params.set("category", query.category);
 
   params.set("page", String(query.page ?? 0));
   params.set("size", String(query.size ?? PAGE_SIZE));

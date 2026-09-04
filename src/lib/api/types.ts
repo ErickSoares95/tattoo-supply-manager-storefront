@@ -1,7 +1,6 @@
-// Mirrors the backend's actual DTOs (tattoo-supply-manager, product module) - only
-// name/description/price/stock/imageUrl exist for real, unlike the mockup's richer
-// product model (brand/category/rating/bestseller). See docs/PLANO_REDESIGN.md for the
-// note on what's real vs. still mock-only decoration.
+import type { ProductCategoryValue } from "@/lib/constants/categories";
+
+// Mirrors the backend's actual DTOs (tattoo-supply-manager, product module).
 export interface ProductResponse {
   id: number;
   name: string;
@@ -9,6 +8,9 @@ export interface ProductResponse {
   price: number;
   stock: number;
   imageUrl: string | null;
+  /** Nullable - products created before this field existed stay null until an admin
+   * backfills them (same one-time gap imageUrl had). */
+  category: ProductCategoryValue | null;
   /** True once the product has been in the catalog for 3+ months (see Product.
    * isOnDailyDeal on the backend) - drives "Ofertas do dia" on the home page. No
    * oldPrice/discount field exists; this only decides which real products show up
@@ -41,6 +43,7 @@ export interface ProductPayload {
   price: number;
   stock: number;
   imageUrl: string | null;
+  category: ProductCategoryValue | null;
 }
 
 // Matches UpdateUserRequest exactly - admin edits go through PUT /users/{id}, a full

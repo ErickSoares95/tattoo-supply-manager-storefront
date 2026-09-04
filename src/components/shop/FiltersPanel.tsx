@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { PRODUCT_CATEGORIES } from "@/lib/constants/categories";
 
 // URL search params are the source of truth (not local-only state) so filters are
 // shareable/bookmarkable and the actual fetch happens server-side in produtos/page.tsx -
@@ -35,6 +36,15 @@ export function FiltersPanel() {
     navigate({ inStockOnly: checked ? "true" : "" });
   }
 
+  // Instant navigation on select, same as toggleInStock above - a category switch reads
+  // more like clicking a department link (DepartmentMenu sends here too) than a value
+  // you type and then have to remember to submit.
+  function selectCategory(value: string) {
+    navigate({ category: value });
+  }
+
+  const selectedCategory = searchParams.get("category") ?? "";
+
   return (
     <aside aria-label="Filtros de produtos" className="rounded-lg border border-line bg-bg-card p-4">
       <h3 className="mb-3 text-xs font-semibold tracking-[0.1em] text-gold uppercase">Filtrar</h3>
@@ -49,6 +59,34 @@ export function FiltersPanel() {
             placeholder="Nome ou descrição..."
             className="w-full rounded-md border border-line bg-bg px-3 py-2 text-sm text-cream outline-none placeholder:text-muted focus-visible:border-gold"
           />
+        </fieldset>
+
+        <fieldset className="border-b border-line pb-4">
+          <legend className="mb-2 text-[13px] font-semibold text-cream">Categoria</legend>
+          <div className="flex flex-col gap-1.5">
+            <label className="flex items-center gap-2 text-sm text-muted">
+              <input
+                type="radio"
+                name="category"
+                checked={selectedCategory === ""}
+                onChange={() => selectCategory("")}
+                className="h-4 w-4 accent-gold"
+              />
+              Todas as categorias
+            </label>
+            {PRODUCT_CATEGORIES.map((category) => (
+              <label key={category.value} className="flex items-center gap-2 text-sm text-muted">
+                <input
+                  type="radio"
+                  name="category"
+                  checked={selectedCategory === category.value}
+                  onChange={() => selectCategory(category.value)}
+                  className="h-4 w-4 accent-gold"
+                />
+                {category.label}
+              </label>
+            ))}
+          </div>
         </fieldset>
 
         <fieldset className="border-b border-line pb-4">

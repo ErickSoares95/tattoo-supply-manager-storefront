@@ -4,11 +4,13 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import { createProduct, fetchProductById, updateProductAdmin } from "@/lib/api/products";
+import type { ProductCategoryValue } from "@/lib/constants/categories";
+import { PRODUCT_CATEGORIES } from "@/lib/constants/categories";
 import type { ProductPayload } from "@/lib/api/types";
 import { useAuth } from "@/lib/store/AuthContext";
 import { ProductImage } from "@/components/shop/ProductImage";
 
-const EMPTY_FORM: ProductPayload = { name: "", description: "", price: 0, stock: 0, imageUrl: "" };
+const EMPTY_FORM: ProductPayload = { name: "", description: "", price: 0, stock: 0, imageUrl: "", category: null };
 
 const FIELD_CLASS =
   "rounded-md border border-line bg-bg px-3 py-2 text-cream outline-none focus-visible:border-gold";
@@ -37,6 +39,7 @@ export function ProductForm({ productId }: { productId?: number }) {
           price: product.price,
           stock: product.stock,
           imageUrl: product.imageUrl ?? "",
+          category: product.category,
         }),
       )
       .catch((err) => setError(err instanceof ApiError ? err.message : "Não foi possível carregar o produto."))
@@ -48,6 +51,10 @@ export function ProductForm({ productId }: { productId?: number }) {
       const value = field === "price" || field === "stock" ? Number(event.target.value) : event.target.value;
       setForm((prev) => ({ ...prev, [field]: value }));
     };
+  }
+
+  function handleCategoryChange(event: ChangeEvent<HTMLSelectElement>) {
+    setForm((prev) => ({ ...prev, category: event.target.value as ProductCategoryValue }));
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -116,6 +123,20 @@ export function ProductForm({ productId }: { productId?: number }) {
           onChange={handleChange("stock")}
           className={FIELD_CLASS}
         />
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        Categoria
+        <select required value={form.category ?? ""} onChange={handleCategoryChange} className={FIELD_CLASS}>
+          <option value="" disabled>
+            Selecione uma categoria
+          </option>
+          {PRODUCT_CATEGORIES.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.label}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="flex flex-col gap-1 text-sm text-muted">
