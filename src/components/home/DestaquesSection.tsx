@@ -1,57 +1,34 @@
-"use client";
+import { fetchProducts } from "@/lib/api/products";
+import { CatalogProductCard } from "@/components/shop/CatalogProductCard";
 
-import { useState } from "react";
-import { products } from "@/lib/data/products";
-import { ProductCard } from "@/components/shop/ProductCard";
-
-type Tab = "bestseller" | "new";
-
-// Client Component (not the whole page) because only the tab toggle needs state -
-// keeping that boundary tight is why HeroCarousel/DestaquesSection are client but
-// OfertasSection/the rest of the page stay Server Components.
-export function DestaquesSection() {
-  const [tab, setTab] = useState<Tab>("bestseller");
-
-  const list = (tab === "new" ? products.filter((p) => p.isNew) : products.filter((p) => p.bestseller)).slice(0, 4);
+// Real data now (was lib/data/products.ts mock array + a client-side "Mais vendidos /
+// Novidades" tab toggle before). Dropped the tabs along with the mock data: the real
+// Product has no bestseller/isNew flag to filter by, and with only a handful of real
+// products splitting them into two tabs added no value anyway. This is just the real
+// catalog, same CatalogProductCard (and real "Adicionar ao carrinho") as /produtos.
+export async function DestaquesSection() {
+  const page = await fetchProducts({ size: 100 });
+  const list = page.content;
 
   return (
     <section id="destaques" aria-labelledby="destaques-title" className="mx-auto max-w-7xl px-5 py-14">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.25em] text-gold">SELEÇÃO DA CASA</p>
-          <h2 id="destaques-title" className="font-serif text-[30px] text-cream">Destaques da loja</h2>
-        </div>
-        <div role="tablist" aria-label="Filtrar destaques" className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "bestseller"}
-            onClick={() => setTab("bestseller")}
-            className={`rounded-full border px-[18px] py-2 text-[13px] font-semibold ${
-              tab === "bestseller" ? "border-gold bg-gold text-bg" : "border-line bg-bg-card text-muted"
-            }`}
-          >
-            Mais vendidos
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "new"}
-            onClick={() => setTab("new")}
-            className={`rounded-full border px-[18px] py-2 text-[13px] font-semibold ${
-              tab === "new" ? "border-gold bg-gold text-bg" : "border-line bg-bg-card text-muted"
-            }`}
-          >
-            Novidades
-          </button>
-        </div>
+      <div className="mb-6">
+        <p className="text-xs font-semibold tracking-[0.25em] text-gold">SELEÇÃO DA CASA</p>
+        <h2 id="destaques-title" className="font-serif text-[30px] text-cream">Destaques da loja</h2>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-[18px]">
+      {/* Mobile: horizontal swipe carousel (matches the original mockup's .card-grid
+          behavior below 640px); sm+: back to the regular auto-fit grid. */}
+      <p className="mb-3 text-center text-[12.5px] text-muted sm:hidden">← deslize para o lado para ver mais →</p>
+      <div className="flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-[repeat(auto-fit,minmax(230px,1fr))] sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
         {list.length > 0 ? (
-          list.map((product) => <ProductCard key={product.id} product={product} />)
+          list.map((product) => (
+            <div key={product.id} className="w-[74%] shrink-0 snap-start sm:w-auto sm:shrink sm:snap-align-none">
+              <CatalogProductCard product={product} />
+            </div>
+          ))
         ) : (
-          <p className="text-muted">Nenhum item nesta categoria ainda.</p>
+          <p className="text-muted">Nenhum produto cadastrado ainda.</p>
         )}
       </div>
     </section>

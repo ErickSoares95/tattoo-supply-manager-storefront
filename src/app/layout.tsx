@@ -8,6 +8,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { AccessibilityProvider } from "@/lib/store/AccessibilityContext";
 import { AuthProvider } from "@/lib/store/AuthContext";
 import { CartProvider } from "@/lib/store/CartContext";
+import { WishlistProvider } from "@/lib/store/WishlistContext";
 import "./globals.css";
 
 // next/font self-hosts and subsets at build time (no request to Google Fonts at
@@ -38,14 +39,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AccessibilityProvider>
           <AuthProvider>
             <CartProvider>
-              <SkipLink />
-              <TopBar />
-              <Header />
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <CartDrawer />
+              <WishlistProvider>
+                <SkipLink />
+                <TopBar />
+                <Header />
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+                <CartDrawer />
+              </WishlistProvider>
             </CartProvider>
           </AuthProvider>
         </AccessibilityProvider>

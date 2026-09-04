@@ -3,6 +3,7 @@ import type { ProductResponse } from "@/lib/api/types";
 import { splitPrice } from "@/lib/format";
 import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { ProductImage } from "@/components/shop/ProductImage";
+import { WishlistButton } from "@/components/shop/WishlistButton";
 
 // Leaner than shop/ProductCard.tsx on purpose: real ProductResponse only has
 // name/description/price/stock, not the mockup's brand/rating/badges.
@@ -11,7 +12,8 @@ export function CatalogProductCard({ product }: { product: ProductResponse }) {
   const inStock = product.stock > 0;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-[10px] border border-line bg-bg-card transition hover:-translate-y-[3px] hover:border-gold-dark">
+    <article className="relative flex flex-col overflow-hidden rounded-[10px] border border-line bg-bg-card transition hover:-translate-y-[3px] hover:border-gold-dark">
+      <WishlistButton productId={product.id} name={product.name} />
       <Link href={`/produto/${product.id}`} aria-label={product.name}>
         <ProductImage src={product.imageUrl} alt={product.name} />
       </Link>

@@ -6,6 +6,7 @@ import { fetchProductById } from "@/lib/api/products";
 import { splitPrice } from "@/lib/format";
 import { AddToCartForm } from "@/components/shop/AddToCartForm";
 import { ProductImage } from "@/components/shop/ProductImage";
+import { WishlistButton } from "@/components/shop/WishlistButton";
 
 interface ProdutoPageProps {
   params: Promise<{ id: string }>;
@@ -48,7 +49,8 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
       </p>
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-[10px] border border-line">
+        <div className="relative overflow-hidden rounded-[10px] border border-line">
+          <WishlistButton productId={product.id} name={product.name} />
           <ProductImage src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
         </div>
 

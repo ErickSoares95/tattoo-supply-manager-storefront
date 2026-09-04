@@ -68,17 +68,22 @@ export default function OrdersPage() {
 
       <ul className="mt-6 flex flex-col gap-3">
         {orders.map((order) => (
-          <li
-            key={order.id}
-            className="flex items-center justify-between rounded-lg border border-line bg-bg-card px-4 py-3.5"
-          >
-            <div>
-              <p className="font-semibold text-cream">Pedido #{order.id}</p>
-              <p className="text-sm text-muted">
-                {new Date(order.creationDate).toLocaleString("pt-BR")} · {order.items.length} item(ns)
-              </p>
-            </div>
-            <p className="font-bold text-gold-light">{formatBRL(order.total)}</p>
+          <li key={order.id}>
+            <Link
+              href={`/pedidos/${order.id}`}
+              className="flex items-center justify-between rounded-lg border border-line bg-bg-card px-4 py-3.5 transition hover:border-gold-dark"
+            >
+              <div>
+                <p className="font-semibold text-cream">Pedido #{order.id}</p>
+                <p className="text-sm text-muted">
+                  {new Date(order.creationDate).toLocaleString("pt-BR")} · {order.items.length} item(ns)
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <p className="font-bold text-gold-light">{formatBRL(order.total)}</p>
+                <span aria-hidden className="text-muted">›</span>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>

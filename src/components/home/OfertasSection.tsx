@@ -1,10 +1,16 @@
-import { products } from "@/lib/data/products";
-import { ProductCard } from "@/components/shop/ProductCard";
+import { fetchProducts } from "@/lib/api/products";
+import { CatalogProductCard } from "@/components/shop/CatalogProductCard";
 
-// Server Component: "deals" is just products with an oldPrice, no interactivity
-// needed, so no reason to ship this to the client.
-export function OfertasSection() {
-  const deals = products.filter((p) => p.oldPrice !== null);
+// Real data now (was lib/data/products.ts mock array before) - "on deal" is a real
+// backend rule (Product.isOnDailyDeal: 3+ months since creationDate), not a fabricated
+// discount. A product either qualifies or it doesn't; there's no oldPrice to show a
+// "-14%" badge with, so this section is just the real catalog filtered down, same
+// CatalogProductCard (and real "Adicionar ao carrinho") as /produtos.
+export async function OfertasSection() {
+  const page = await fetchProducts({ size: 100 });
+  const deals = page.content.filter((product) => product.onDeal);
+
+  if (deals.length === 0) return null;
 
   return (
     <section id="ofertas" aria-labelledby="ofertas-title" className="mx-auto max-w-7xl px-5 py-14">
@@ -15,9 +21,14 @@ export function OfertasSection() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-[18px]">
+      {/* Mobile: horizontal swipe carousel (matches the original mockup's .card-grid
+          behavior below 640px); sm+: back to the regular auto-fit grid. */}
+      <p className="mb-3 text-center text-[12.5px] text-muted sm:hidden">← deslize para o lado para ver mais →</p>
+      <div className="flex snap-x snap-mandatory gap-[18px] overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] sm:grid sm:grid-cols-[repeat(auto-fit,minmax(230px,1fr))] sm:overflow-visible sm:pb-0 [&::-webkit-scrollbar]:hidden">
         {deals.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div key={product.id} className="w-[74%] shrink-0 snap-start sm:w-auto sm:shrink sm:snap-align-none">
+            <CatalogProductCard product={product} />
+          </div>
         ))}
       </div>
 

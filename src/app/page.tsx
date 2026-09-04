@@ -2,8 +2,9 @@ import { DestaquesSection } from "@/components/home/DestaquesSection";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { OfertasSection } from "@/components/home/OfertasSection";
 
-// Step 2/6 of the redesign: hero carousel + "Ofertas do dia"/"Destaques", mock data
-// (src/lib/data/products.ts). Real catalog wiring is step 3.
+// Hero carousel + "Ofertas do dia"/"Destaques", both wired to the real catalog
+// (OfertasSection/DestaquesSection are async Server Components that fetch from the
+// Spring Boot API - no mock data left here, see lib/data/products.ts's removal).
 export default function Home() {
   return (
     <>

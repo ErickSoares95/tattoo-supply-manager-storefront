@@ -9,6 +9,11 @@ export interface ProductResponse {
   price: number;
   stock: number;
   imageUrl: string | null;
+  /** True once the product has been in the catalog for 3+ months (see Product.
+   * isOnDailyDeal on the backend) - drives "Ofertas do dia" on the home page. No
+   * oldPrice/discount field exists; this only decides which real products show up
+   * there, it doesn't fabricate a price cut. */
+  onDeal: boolean;
 }
 
 // Spring Data's Page<T> JSON shape.

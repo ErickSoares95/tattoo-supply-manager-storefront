@@ -20,3 +20,12 @@ export function fetchMyOrders(token: string): Promise<PageResponse<OrderResponse
     cache: "no-store",
   });
 }
+
+// GET /orders/{id} - backend already enforces owner-or-admin (403 otherwise), so this
+// page doesn't need its own ownership check beyond handling that error.
+export function fetchOrderById(id: number, token: string): Promise<OrderResponse> {
+  return apiFetch<OrderResponse>(`/orders/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+}

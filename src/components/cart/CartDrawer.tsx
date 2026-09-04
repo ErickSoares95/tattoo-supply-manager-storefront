@@ -19,7 +19,6 @@ export function CartDrawer() {
 
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   // WAI-ARIA authoring practices for a modal dialog: Escape must dismiss it. role="dialog"
   // aria-modal="true" alone doesn't give this for free - the browser does nothing special
@@ -44,12 +43,16 @@ export function CartDrawer() {
     setPlacing(true);
 
     try {
-      await createOrder(
+      const order = await createOrder(
         items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
         token,
       );
       clear();
-      setSuccess(true);
+      close();
+      // Was: just an inline "Pedido realizado com sucesso!" that left the drawer open
+      // with no way to see what was actually ordered. Now sends straight to the order's
+      // own detail page (see /pedidos/[id]), which doubles as the confirmation screen.
+      router.push(`/pedidos/${order.id}`);
     } catch (err) {
       // Same stale-token case as /pedidos (see that page's comment): a leftover token
       // from an old session looks authenticated client-side but the backend rejects it.
@@ -145,7 +148,6 @@ export function CartDrawer() {
           </div>
 
           {error && <p className="text-sm text-danger">{error}</p>}
-          {success && <p className="text-sm text-ok">Pedido realizado com sucesso!</p>}
           {!isAuthenticated && items.length > 0 && (
             <p className="text-xs text-muted">Faça login pra finalizar a compra.</p>
           )}

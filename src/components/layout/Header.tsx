@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { CartButton } from "@/components/cart/CartButton";
 import { AccountButton } from "@/components/layout/AccountButton";
-import { HeartIcon, SearchIcon, WingLogo } from "@/components/ui/icons";
+import { SearchIcon, WingLogo } from "@/components/ui/icons";
+import { WishlistHeaderButton } from "@/components/shop/WishlistHeaderButton";
 
 const DEPARTMENTS = [
   "Máquinas",
@@ -72,10 +73,7 @@ export function Header() {
           </form>
 
           <AccountButton />
-          <button type="button" aria-label="Lista de desejos" className="flex items-center justify-center rounded-full p-2 text-cream hover:bg-gold/10 hover:text-gold-light">
-            <HeartIcon className="h-5 w-5" />
-            <span className="visually-hidden">Desejos</span>
-          </button>
+          <WishlistHeaderButton />
           <CartButton />
         </div>
       </div>
