@@ -4,27 +4,31 @@ interface PaginationProps {
   currentPage: number; // 0-indexed, matches Spring's Page.number
   totalPages: number;
   searchParams: Record<string, string | undefined>;
+  /** / (home) or /produtos - ProductCatalog renders on both now (2026-09-05), so this
+   * can't be hardcoded to /produtos anymore or paging from home would bounce the
+   * visitor over to /produtos instead of just changing page. */
+  basePath: string;
 }
 
-function buildHref(searchParams: PaginationProps["searchParams"], page: number) {
+function buildHref(searchParams: PaginationProps["searchParams"], page: number, basePath: string) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(searchParams)) {
     if (value && key !== "page") params.set(key, value);
   }
   if (page > 0) params.set("page", String(page));
   const query = params.toString();
-  return `/produtos${query ? `?${query}` : ""}`;
+  return `${basePath}${query ? `?${query}` : ""}`;
 }
 
 // Server Component: page links are plain <a>/<Link>, no client state needed - the
-// server-rendered produtos/page.tsx already knows the current page from searchParams.
-export function Pagination({ currentPage, totalPages, searchParams }: PaginationProps) {
+// server-rendered ProductCatalog already knows the current page from searchParams.
+export function Pagination({ currentPage, totalPages, searchParams, basePath }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
     <nav aria-label="Paginação de produtos" className="mt-6 flex flex-wrap items-center justify-center gap-2">
       <Link
-        href={buildHref(searchParams, Math.max(0, currentPage - 1))}
+        href={buildHref(searchParams, Math.max(0, currentPage - 1), basePath)}
         aria-disabled={currentPage === 0}
         className={`rounded-full border border-line px-3.5 py-1.5 text-sm ${
           currentPage === 0 ? "pointer-events-none opacity-35" : "text-cream hover:border-gold hover:text-gold-light"
@@ -38,7 +42,7 @@ export function Pagination({ currentPage, totalPages, searchParams }: Pagination
       </span>
 
       <Link
-        href={buildHref(searchParams, Math.min(totalPages - 1, currentPage + 1))}
+        href={buildHref(searchParams, Math.min(totalPages - 1, currentPage + 1), basePath)}
         aria-disabled={currentPage >= totalPages - 1}
         className={`rounded-full border border-line px-3.5 py-1.5 text-sm ${
           currentPage >= totalPages - 1

@@ -78,14 +78,43 @@ export function CameraIcon(props: IconProps) {
   );
 }
 
-export function WingLogo(props: IconProps) {
+// Butterfly, replacing the original "wing" mark (2026-09-05, user's pick over a lion) -
+// same minimal line-art style/100x100 viewBox as the mark it replaces, so it drops into
+// Header at the same size/aspect ratio with no layout changes needed.
+export function ButterflyLogo(props: IconProps) {
   return (
     <svg viewBox="0 0 100 100" role="img" aria-hidden="true" {...props}>
-      <path d="M50 20 C40 10, 15 10, 5 25 C20 30, 35 35, 50 50 C65 35, 80 30, 95 25 C85 10, 60 10, 50 20 Z" fill="none" stroke="currentColor" strokeWidth="2" />
-      <circle cx="50" cy="50" r="4" fill="currentColor" />
-      <path d="M50 54 L50 85" stroke="currentColor" strokeWidth="2" />
-      <path d="M50 60 C40 65, 35 75, 38 85" stroke="currentColor" strokeWidth="1.5" fill="none" />
-      <path d="M50 60 C60 65, 65 75, 62 85" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      {/* body + antennae */}
+      <circle cx="50" cy="24" r="3" fill="currentColor" />
+      <path d="M50 27 L50 75" stroke="currentColor" strokeWidth="2" />
+      <path d="M50 26 C46 18, 40 14, 34 12" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <path d="M50 26 C54 18, 60 14, 66 12" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      {/* upper wings */}
+      <path
+        d="M49 33 C35 14, 10 14, 6 34 C10 49, 30 54, 49 45 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M51 33 C65 14, 90 14, 94 34 C90 49, 70 54, 51 45 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      {/* lower wings */}
+      <path
+        d="M49 49 C40 54, 25 59, 22 71 C30 79, 42 75, 49 63 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M51 49 C60 54, 75 59, 78 71 C70 79, 58 75, 51 63 Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }

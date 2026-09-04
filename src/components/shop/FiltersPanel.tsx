@@ -1,14 +1,18 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { PRODUCT_CATEGORIES } from "@/lib/constants/categories";
 
 // URL search params are the source of truth (not local-only state) so filters are
-// shareable/bookmarkable and the actual fetch happens server-side in produtos/page.tsx -
-// this component only ever navigates, it never fetches.
+// shareable/bookmarkable and the actual fetch happens server-side (ProductCatalog) -
+// this component only ever navigates, it never fetches. Renders on both / (home) and
+// /produtos now (2026-09-05, ProductCatalog is shared between them) - pathname has to
+// be read at navigate-time rather than hardcoded, or filtering from home would silently
+// bounce the visitor over to /produtos instead of updating the page they're already on.
 export function FiltersPanel() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const [name, setName] = useState(searchParams.get("name") ?? "");
@@ -24,7 +28,7 @@ export function FiltersPanel() {
       else params.delete(key);
     }
     params.delete("page"); // any filter change resets pagination
-    router.push(`/produtos?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   function handleSubmit(event: FormEvent) {
@@ -36,9 +40,13 @@ export function FiltersPanel() {
     navigate({ inStockOnly: checked ? "true" : "" });
   }
 
+  function toggleOnDeal(checked: boolean) {
+    navigate({ onDeal: checked ? "true" : "" });
+  }
+
   // Instant navigation on select, same as toggleInStock above - a category switch reads
-  // more like clicking a department link (DepartmentMenu sends here too) than a value
-  // you type and then have to remember to submit.
+  // more like clicking a department link than a value you type and then have to
+  // remember to submit.
   function selectCategory(value: string) {
     navigate({ category: value });
   }
@@ -124,6 +132,19 @@ export function FiltersPanel() {
               className="h-4 w-4 accent-gold"
             />
             Somente em estoque
+          </label>
+          {/* Replaces the old "Ofertas do dia" home section/menu link (removed
+              2026-09-05, see project-roadmap) - onDeal isn't a real Product column
+              (Product.isOnDailyDeal is computed from creationDate), FindAllProductsService
+              resolves this filter in memory the same way it does the unitsSold sort. */}
+          <label className="mt-2 flex items-center gap-2 text-sm text-muted">
+            <input
+              type="checkbox"
+              defaultChecked={searchParams.get("onDeal") === "true"}
+              onChange={(e) => toggleOnDeal(e.target.checked)}
+              className="h-4 w-4 accent-gold"
+            />
+            Somente ofertas do dia
           </label>
         </fieldset>
 

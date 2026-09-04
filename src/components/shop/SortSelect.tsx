@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 // "" is the default (no explicit ?sort= in the URL) - fetchProducts resolves that to
 // "mais vendido primeiro" server-side, so this list doesn't need its own separate
@@ -12,8 +12,11 @@ const OPTIONS = [
   { value: "name-asc", label: "Nome: A-Z" },
 ] as const;
 
+// Renders on both / (home) and /produtos now (2026-09-05, ProductCatalog is shared) -
+// same pathname-at-navigate-time reasoning as FiltersPanel.
 export function SortSelect() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   function handleChange(value: string) {
@@ -21,7 +24,7 @@ export function SortSelect() {
     if (value) params.set("sort", value);
     else params.delete("sort");
     params.delete("page");
-    router.push(`/produtos?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (

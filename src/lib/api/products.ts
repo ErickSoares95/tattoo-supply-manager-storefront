@@ -16,6 +16,7 @@ export interface ProductQuery {
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
+  onDeal?: boolean;
   category?: ProductCategoryValue;
   sort?: "bestselling" | "price-asc" | "price-desc" | "name-asc";
   page?: number;
@@ -33,6 +34,7 @@ export function fetchProducts(query: ProductQuery): Promise<PageResponse<Product
   if (query.minPrice !== undefined) params.set("minPrice", String(query.minPrice));
   if (query.maxPrice !== undefined) params.set("maxPrice", String(query.maxPrice));
   if (query.inStockOnly) params.set("minStock", "1");
+  if (query.onDeal) params.set("onDeal", "true");
   if (query.category) params.set("category", query.category);
 
   params.set("page", String(query.page ?? 0));

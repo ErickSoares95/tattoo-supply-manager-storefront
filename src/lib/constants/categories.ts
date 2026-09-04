@@ -4,8 +4,9 @@
 // pattern as UserType/UserStatus badges in the admin panel not being translated either
 // - only the human-facing text here is.
 //
-// Single source of truth for both the department menu (Header/DepartmentMenu) and the
-// catalog's category filter (FiltersPanel), so the two can't drift out of sync.
+// Single source of truth for the catalog's category filter (FiltersPanel), the
+// Header's department <select> in the search bar, and the admin product form's
+// category <select>, so none of them can drift out of sync.
 export const PRODUCT_CATEGORIES = [
   { value: "MACHINES", label: "Máquinas" },
   { value: "NEEDLES", label: "Agulhas" },
