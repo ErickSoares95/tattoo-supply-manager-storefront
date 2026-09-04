@@ -96,20 +96,11 @@ export function Header() {
       </form>
 
       <div className="border-t border-line">
-        <nav aria-label="Categorias rápidas" className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-2 text-[13px]">
+        <nav aria-label="Categorias rápidas" className="mx-auto flex max-w-7xl items-center px-5 py-2 text-[13px]">
+          {/* Destaques/Sobre/Contato/Ofertas do dia moved inside the dropdown itself
+              (see DepartmentMenu) - the always-visible row didn't need to carry both
+              the department list AND the page-anchor links at once. */}
           <DepartmentMenu />
-          <a href="#destaques" className="text-muted hover:text-gold-light">
-            Destaques
-          </a>
-          <a href="#sobre" className="text-muted hover:text-gold-light">
-            Sobre
-          </a>
-          <a href="#contato" className="text-muted hover:text-gold-light">
-            Contato
-          </a>
-          <a href="#ofertas" className="font-semibold text-gold-light">
-            Ofertas do dia
-          </a>
         </nav>
       </div>
     </header>

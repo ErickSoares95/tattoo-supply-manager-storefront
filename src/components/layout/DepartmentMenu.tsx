@@ -4,6 +4,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCT_CATEGORIES } from "@/lib/constants/categories";
 
+// Anchors to sections on the home page. Absolute (/#id, not #id) on purpose - this menu
+// renders in the Header on every page (not just "/"), and a bare "#destaques" href only
+// scrolls within whatever page you're already on, silently doing nothing anywhere else.
+const PAGE_LINKS = [
+  { href: "/#destaques", label: "Destaques" },
+  { href: "/#sobre", label: "Sobre" },
+  { href: "/#contato", label: "Contato" },
+  { href: "/#ofertas", label: "Ofertas do dia" },
+] as const;
+
 // Real dropdown now that categories are a real Product field (ProductCategory on the
 // backend) - was a plain link to /produtos before, on purpose (see git history):
 // "a real aria-haspopup button promising a mega menu that never opens would be a false
@@ -54,6 +64,9 @@ export function DepartmentMenu() {
           aria-label="Departamentos"
           className="absolute top-full left-0 z-40 mt-2 w-64 rounded-lg border border-line bg-bg-card p-2 shadow-lg"
         >
+          <p className="px-3 pb-1 text-[11px] font-semibold tracking-[0.1em] text-gold uppercase">
+            Departamentos
+          </p>
           <ul className="flex flex-col">
             {PRODUCT_CATEGORIES.map((category) => (
               <li key={category.value} role="none">
@@ -72,10 +85,25 @@ export function DepartmentMenu() {
             href="/produtos"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="mt-1 block rounded-md border-t border-line px-3 pt-3 pb-2 text-sm font-semibold text-gold-light hover:underline"
+            className="mt-1 block rounded-md px-3 pt-1 pb-2 text-sm font-semibold text-gold-light hover:underline"
           >
             Ver todos os produtos →
           </Link>
+
+          <ul className="mt-1 flex flex-col border-t border-line pt-2">
+            {PAGE_LINKS.map((link) => (
+              <li key={link.href} role="none">
+                <Link
+                  href={link.href}
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-md px-3 py-2 text-sm text-muted hover:bg-gold/10 hover:text-gold-light"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
