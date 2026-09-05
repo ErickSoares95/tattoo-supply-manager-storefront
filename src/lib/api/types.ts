@@ -134,3 +134,27 @@ export interface OrderResponse {
   total: number;
   creationDate: string;
 }
+
+// Mirrors the payment module (tattoo-supply-manager). Approval is deterministic on the
+// backend: APPROVED only when the paid amount equals the order total exactly, REJECTED
+// otherwise (no real gateway). The storefront always pays the exact total, so from here
+// a payment is effectively always APPROVED - REJECTED is still handled in the UI for
+// completeness (e.g. an admin paying a wrong amount via Postman).
+export type PaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export type PaymentMethod = "PIX" | "CREDIT_CARD" | "BOLETO";
+
+// Matches PaymentRequest exactly - POST /orders/{orderId}/payments.
+export interface PaymentRequest {
+  amount: number;
+  method: string;
+}
+
+export interface PaymentResponse {
+  id: number;
+  orderId: number;
+  amount: number;
+  method: string;
+  status: PaymentStatus;
+  creationDate: string;
+}
