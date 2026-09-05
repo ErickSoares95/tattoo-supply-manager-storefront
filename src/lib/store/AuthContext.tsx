@@ -24,6 +24,10 @@ interface AuthContextValue {
   isLoading: boolean;
   login: (payload: LoginRequest) => Promise<void>;
   logout: () => void;
+  /** Patches the locally-cached user (e.g. after a profile edit changes fullName) so the
+   * header reflects it immediately, without forcing a re-login. Does not call the API
+   * itself - callers save via updateMyProfile first, then pass the fields that changed. */
+  updateUser: (patch: Partial<Pick<AuthUser, "fullName" | "email">>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -71,8 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  function updateUser(patch: Partial<Pick<AuthUser, "fullName" | "email">>) {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

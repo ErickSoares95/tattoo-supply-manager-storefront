@@ -59,6 +59,24 @@ export interface UpdateUserRequest {
   userStatus: UserStatus;
 }
 
+// Matches UpdateProfileRequest exactly - the self-service counterpart to
+// UpdateUserRequest, used by PUT /users/me. No userType/userStatus fields exist here on
+// purpose: a client editing their own profile can never grant themselves a role or
+// unblock their own account through this payload.
+export interface UpdateProfileRequest {
+  username: string;
+  fullName: string;
+  phoneNumber: string | null;
+  cpf: string | null;
+  imageUrl: string | null;
+}
+
+// Matches ChangePasswordRequest exactly - PATCH /users/me/password.
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface LoginRequest {
   /** Accepts either email or CPF - see tattoo-supply-manager#031. */
   login: string;
