@@ -89,6 +89,7 @@ export interface LoginResponse {
   fullName: string;
   email: string;
   userType: UserType;
+  imageUrl: string | null;
 }
 
 export interface CreateUserRequest {

@@ -13,6 +13,8 @@ export function AccountButton() {
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  // URL that failed to load; keyed by URL so a newly saved photo gets a fresh attempt.
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -66,7 +68,19 @@ export function AccountButton() {
         onClick={() => setOpen((current) => !current)}
         className="flex items-center justify-center rounded-full p-2 text-cream hover:bg-gold/10 hover:text-gold-light"
       >
-        <UserIcon className="h-5 w-5" />
+        {user?.imageUrl && user.imageUrl !== failedImageUrl ? (
+          // Plain <img>, not next/image: imageUrl is a user-pasted URL from an arbitrary host
+          // (same reasoning as ProductImage). alt="" because the button already has an aria-label.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.imageUrl}
+            alt=""
+            onError={() => setFailedImageUrl(user.imageUrl ?? null)}
+            className="h-7 w-7 rounded-full object-cover"
+          />
+        ) : (
+          <UserIcon className="h-5 w-5" />
+        )}
       </button>
 
       {open && (

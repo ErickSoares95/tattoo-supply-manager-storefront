@@ -70,7 +70,7 @@ export function ProfileForm() {
       const updated = await updateMyProfile(form, token);
       // Keeps the header ("Minha conta (nome)") and the greeting in the account menu in
       // sync with a changed name right away, without requiring a fresh login.
-      updateUser({ fullName: updated.fullName });
+      updateUser({ fullName: updated.fullName, imageUrl: updated.imageUrl });
       setSuccess(true);
     } catch (err) {
       // Most likely UsernameAlreadyExistsException/CpfAlreadyExistsException (409).

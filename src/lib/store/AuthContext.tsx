@@ -9,6 +9,8 @@ interface AuthUser {
   fullName: string;
   email: string;
   userType: UserType;
+  // Absent in sessions stored before this field existed - treat undefined as no photo.
+  imageUrl?: string | null;
 }
 
 interface AuthContextValue {
@@ -27,7 +29,7 @@ interface AuthContextValue {
   /** Patches the locally-cached user (e.g. after a profile edit changes fullName) so the
    * header reflects it immediately, without forcing a re-login. Does not call the API
    * itself - callers save via updateMyProfile first, then pass the fields that changed. */
-  updateUser: (patch: Partial<Pick<AuthUser, "fullName" | "email">>) => void;
+  updateUser: (patch: Partial<Pick<AuthUser, "fullName" | "email" | "imageUrl">>) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -61,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fullName: response.fullName,
       email: response.email,
       userType: response.userType,
+      imageUrl: response.imageUrl,
     };
     localStorage.setItem("token", response.token);
     localStorage.setItem("user", JSON.stringify(authUser));
@@ -75,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  function updateUser(patch: Partial<Pick<AuthUser, "fullName" | "email">>) {
+  function updateUser(patch: Partial<Pick<AuthUser, "fullName" | "email" | "imageUrl">>) {
     setUser((prev) => {
       if (!prev) return prev;
       const next = { ...prev, ...patch };
