@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/store/AuthContext";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 
-// Client Component (not a server fetch), same reason as /pedidos: needs the token from
+// Client Component (not a server fetch), same reason as /pedidos: needs the session state from
 // AuthContext, which only exists in the browser - see AuthContext.tsx's note on why
 // that hydration can't happen server-side.
 export default function ProfilePage() {

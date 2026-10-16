@@ -9,7 +9,7 @@ import { formatBRL } from "@/lib/format";
 import { useAuth } from "@/lib/store/AuthContext";
 
 export default function AdminProductsPage() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +23,12 @@ export default function AdminProductsPage() {
   }, []);
 
   async function handleDelete(product: ProductResponse) {
-    if (!token) return;
+    if (!isAuthenticated) return;
     if (!window.confirm(`Excluir "${product.name}"? Essa ação não pode ser desfeita.`)) return;
 
     setError(null);
     try {
-      await deleteProduct(product.id, token);
+      await deleteProduct(product.id);
       setProducts((prev) => prev.filter((item) => item.id !== product.id));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível excluir o produto.");

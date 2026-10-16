@@ -13,7 +13,7 @@ const FIELD_CLASS =
 // UpdateProfileRequest) and its own failure mode (wrong current password), so mixing it
 // into the profile form's single save button would blur two independent operations.
 export function ChangePasswordForm() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -24,7 +24,7 @@ export function ChangePasswordForm() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     setError(null);
     setSuccess(false);
@@ -36,7 +36,7 @@ export function ChangePasswordForm() {
 
     setSaving(true);
     try {
-      await changeMyPassword({ currentPassword, newPassword }, token);
+      await changeMyPassword({ currentPassword, newPassword });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");

@@ -27,30 +27,30 @@ function TypeBadge({ type }: { type: UserResponse["userType"] }) {
 }
 
 export default function AdminUsersPage() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
-    fetchAllUsers(token)
+    fetchAllUsers()
       .then((page) => setUsers(page.content))
       .catch((err) => setError(err instanceof ApiError ? err.message : "Não foi possível carregar os usuários."))
       .finally(() => setLoading(false));
-    // Re-runs when `token` flips from null to a real value post-hydration (see
+    // Re-runs when `isAuthenticated` flips to true post-hydration (see
     // AuthContext's isLoading doc comment) - there's nothing to fetch without it.
-  }, [token]);
+  }, [isAuthenticated]);
 
   async function handleDelete(user: UserResponse) {
-    if (!token) return;
+    if (!isAuthenticated) return;
     if (!window.confirm(`Excluir a conta de "${user.fullName}"? Essa ação não pode ser desfeita.`)) return;
 
     setError(null);
     try {
-      await deleteUser(user.id, token);
+      await deleteUser(user.id);
       setUsers((prev) => prev.filter((item) => item.id !== user.id));
     } catch (err) {
       // Most likely LastAdminException (409) - deleting the only remaining active

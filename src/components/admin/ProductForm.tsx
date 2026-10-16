@@ -20,7 +20,7 @@ const FIELD_CLASS =
 // field-for-field identical), only the submit action and the initial load differ.
 export function ProductForm({ productId }: { productId?: number }) {
   const isEditing = productId !== undefined;
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const [form, setForm] = useState<ProductPayload>(EMPTY_FORM);
@@ -59,15 +59,15 @@ export function ProductForm({ productId }: { productId?: number }) {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!token) return;
+    if (!isAuthenticated) return;
 
     setError(null);
     setSaving(true);
     try {
       if (isEditing) {
-        await updateProductAdmin(productId, form, token);
+        await updateProductAdmin(productId, form);
       } else {
-        await createProduct(form, token);
+        await createProduct(form);
       }
       router.push("/admin/produtos");
       router.refresh();

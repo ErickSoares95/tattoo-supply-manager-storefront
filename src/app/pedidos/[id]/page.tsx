@@ -10,14 +10,14 @@ import type { OrderResponse, PaymentMethod, PaymentResponse } from "@/lib/api/ty
 import { formatBRL } from "@/lib/format";
 import { useAuth } from "@/lib/store/AuthContext";
 
-// Client Component for the same reason /pedidos is: needs the token from AuthContext
+// Client Component for the same reason /pedidos is: needs the session state from AuthContext
 // (browser-only). The backend already enforces owner-or-admin on GET /orders/{id} and
 // GET /orders/{id}/payments (403 otherwise) - this page just renders that error state
 // instead of re-checking ownership itself. It doubles as the checkout confirmation +
 // payment screen: the cart creates the order and redirects here, payment happens below.
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { token, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
 
   const [order, setOrder] = useState<OrderResponse | null>(null);
@@ -40,12 +40,12 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       router.replace(`/login?redirect=pedidos/${id}`);
       return;
     }
 
-    Promise.all([fetchOrderById(Number(id), token), fetchOrderPayments(Number(id), token)])
+    Promise.all([fetchOrderById(Number(id)), fetchOrderPayments(Number(id))])
       .then(([loadedOrder, loadedPayments]) => {
         setOrder(loadedOrder);
         setPayments(loadedPayments);
@@ -63,7 +63,7 @@ export default function OrderDetailPage() {
         setError("Não foi possível carregar este pedido.");
       })
       .finally(() => setLoading(false));
-  }, [authLoading, isAuthenticated, token, id, router, handleAuthError]);
+  }, [authLoading, isAuthenticated, id, router, handleAuthError]);
 
   if (authLoading || !isAuthenticated) return null;
 
@@ -138,7 +138,7 @@ function PaymentSection({
   onPaid: (payment: PaymentResponse) => void;
   onAuthError: (err: unknown) => boolean;
 }) {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [method, setMethod] = useState<PaymentMethod>("PIX");
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
@@ -147,12 +147,12 @@ function PaymentSection({
   const lastRejected = !approved && payments[0]?.status === "REJECTED";
 
   async function handlePay() {
-    if (!token) return;
+    if (!isAuthenticated) return;
     setPayError(null);
     setPaying(true);
     try {
       // Always the exact order total, so the backend's deterministic rule approves it.
-      const payment = await createPayment(order.id, order.total, method, token);
+      const payment = await createPayment(order.id, order.total, method);
       onPaid(payment);
     } catch (err) {
       if (onAuthError(err)) return;

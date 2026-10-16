@@ -14,7 +14,7 @@ const FIELD_CLASS =
 // /registrar signup, always as CLIENT; PUT /users/{id} is how an admin promotes/blocks
 // someone afterward), so unlike ProductForm this component never handles a create path.
 export function UserForm({ userId }: { userId: number }) {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const [form, setForm] = useState<UpdateUserRequest | null>(null);
@@ -23,9 +23,9 @@ export function UserForm({ userId }: { userId: number }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
-    fetchUserById(userId, token)
+    fetchUserById(userId)
       .then((user) =>
         setForm({
           username: user.username,
@@ -39,7 +39,7 @@ export function UserForm({ userId }: { userId: number }) {
       )
       .catch((err) => setError(err instanceof ApiError ? err.message : "Não foi possível carregar o usuário."))
       .finally(() => setLoading(false));
-  }, [userId, token]);
+  }, [userId, isAuthenticated]);
 
   function handleChange<K extends keyof UpdateUserRequest>(field: K) {
     return (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -49,12 +49,12 @@ export function UserForm({ userId }: { userId: number }) {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!token || !form) return;
+    if (!isAuthenticated || !form) return;
 
     setError(null);
     setSaving(true);
     try {
-      await updateUser(userId, form, token);
+      await updateUser(userId, form);
       router.push("/admin/usuarios");
       router.refresh();
     } catch (err) {

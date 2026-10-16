@@ -9,11 +9,11 @@ import type { OrderResponse } from "@/lib/api/types";
 import { formatBRL } from "@/lib/format";
 import { useAuth } from "@/lib/store/AuthContext";
 
-// Client Component (not a server fetch) because it needs the token from AuthContext,
+// Client Component (not a server fetch) because it needs the session state from AuthContext,
 // which only exists in the browser (localStorage) - see AuthContext.tsx's note on why
 // that hydration can't happen server-side.
 export default function OrdersPage() {
-  const { token, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
 
   const [orders, setOrders] = useState<OrderResponse[]>([]);
@@ -26,16 +26,16 @@ export default function OrdersPage() {
     // just check isAuthenticated directly on mount.
     if (authLoading) return;
 
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       router.replace("/login?redirect=pedidos");
       return;
     }
 
-    fetchMyOrders(token)
+    fetchMyOrders()
       .then((page) => setOrders(page.content))
       .catch((err) => {
-        // A stale/expired token from a previous session still passes the isAuthenticated
-        // check above (it's just a non-empty string) but fails on the backend - without
+        // An expired session cookie still passes the isAuthenticated
+        // check above (that only knows a profile is cached) but fails on the backend - without
         // this, the page got stuck showing a generic error forever with "Sair" still in
         // the navbar, instead of clearing the dead session and sending the user to log in
         // again.
@@ -47,7 +47,7 @@ export default function OrdersPage() {
         setError("Não foi possível carregar seus pedidos.");
       })
       .finally(() => setLoading(false));
-  }, [authLoading, isAuthenticated, token, router, logout]);
+  }, [authLoading, isAuthenticated, router, logout]);
 
   if (authLoading || !isAuthenticated) return null;
 

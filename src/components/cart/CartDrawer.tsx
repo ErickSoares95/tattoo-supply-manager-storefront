@@ -8,13 +8,13 @@ import { formatBRL } from "@/lib/format";
 import { useAuth } from "@/lib/store/AuthContext";
 import { useCart } from "@/lib/store/CartContext";
 
-// Checkout can't complete without a logged-in user (POST /orders requires a Bearer
-// token, CLIENT/ADMIN only) - that's the real coupling between this step (cart) and
+// Checkout can't complete without a logged-in user (POST /orders requires a session,
+// CLIENT/ADMIN only) - that's the real coupling between this step (cart) and
 // step 5 (login), not an accident. Anonymous checkout redirects to /login instead of
 // failing silently.
 export function CartDrawer() {
   const { items, isOpen, close, removeItem, updateQuantity, subtotal, clear } = useCart();
-  const { token, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
   const [placing, setPlacing] = useState(false);
@@ -33,7 +33,7 @@ export function CartDrawer() {
   }, [isOpen, close]);
 
   async function handleCheckout() {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
       close();
       router.push("/login?redirect=carrinho");
       return;
@@ -45,7 +45,6 @@ export function CartDrawer() {
     try {
       const order = await createOrder(
         items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
-        token,
       );
       clear();
       close();
@@ -54,7 +53,7 @@ export function CartDrawer() {
       // own detail page (see /pedidos/[id]), which doubles as the confirmation screen.
       router.push(`/pedidos/${order.id}`);
     } catch (err) {
-      // Same stale-token case as /pedidos (see that page's comment): a leftover token
+      // Same expired-session case as /pedidos (see that page's comment): a leftover session
       // from an old session looks authenticated client-side but the backend rejects it.
       // Without this, checkout just failed with a generic error and the user stayed
       // stuck "logged in" with no way to tell why.

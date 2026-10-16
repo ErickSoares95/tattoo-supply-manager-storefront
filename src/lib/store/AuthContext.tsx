@@ -13,9 +13,16 @@ interface AuthUser {
   imageUrl?: string | null;
 }
 
+// The session itself is the HttpOnly cookie set by /api/auth/login, invisible to JavaScript.
+// localStorage only keeps the profile shown in the header (nothing secret), so a page reload
+// knows who is logged in without a round trip. If the cookie has expired, the next
+// authenticated call answers 401 and the pages call logout().
+const USER_KEY = "user";
+// Where the JWT used to live before the BFF; removed on hydration.
+const LEGACY_TOKEN_KEY = "token";
+
 interface AuthContextValue {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   /** True until localStorage hydration (see AuthProvider) has run once. Pages that
    * gate access on isAuthenticated (e.g. /pedidos) must wait for this to go false
@@ -35,10 +42,9 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Both start null on the server and on first client render (avoids a hydration
-  // mismatch), then hydrate from localStorage in the effect below, client-only.
+  // Starts null on the server and on first client render (avoids a hydration mismatch),
+  // then hydrates from localStorage in the effect below, client-only.
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -46,12 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // localStorage, a browser-only store that doesn't exist during SSR - reading it in
     // a lazy useState initializer instead would make the client's first render differ
     // from the server-rendered HTML (a hydration mismatch), which is worse.
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    if (storedToken && storedUser) {
+    const hadLegacyToken = localStorage.getItem(LEGACY_TOKEN_KEY) !== null;
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+
+    const storedUser = localStorage.getItem(USER_KEY);
+    if (storedUser && !hadLegacyToken) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setToken(storedToken);
       setUser(JSON.parse(storedUser) as AuthUser);
+    } else {
+      // A session from before the BFF has no cookie: ask for a fresh login.
+      localStorage.removeItem(USER_KEY);
     }
     setIsLoading(false);
   }, []);
@@ -65,30 +75,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userType: response.userType,
       imageUrl: response.imageUrl,
     };
-    localStorage.setItem("token", response.token);
-    localStorage.setItem("user", JSON.stringify(authUser));
-    setToken(response.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(authUser));
     setUser(authUser);
   }
 
   function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setToken(null);
+    localStorage.removeItem(USER_KEY);
     setUser(null);
+    // Drops the HttpOnly cookie server-side; a failure here only leaves a cookie that the
+    // next 401 (or its own expiry) clears anyway.
+    authApi.logout().catch(() => {});
   }
 
   function updateUser(patch: Partial<Pick<AuthUser, "fullName" | "email" | "imageUrl">>) {
     setUser((prev) => {
       if (!prev) return prev;
       const next = { ...prev, ...patch };
-      localStorage.setItem("user", JSON.stringify(next));
+      localStorage.setItem(USER_KEY, JSON.stringify(next));
       return next;
     });
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, isLoading, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

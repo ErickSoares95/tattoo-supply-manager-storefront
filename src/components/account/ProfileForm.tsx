@@ -16,7 +16,7 @@ const FIELD_CLASS =
 // UpdateProfileRequest at all: a client can't grant themselves a role or unblock their
 // own account through this form even if they tampered with the request body by hand.
 export function ProfileForm() {
-  const { token, logout, updateUser } = useAuth();
+  const { isAuthenticated, logout, updateUser } = useAuth();
   const router = useRouter();
 
   const [form, setForm] = useState<UpdateProfileRequest | null>(null);
@@ -26,9 +26,9 @@ export function ProfileForm() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!isAuthenticated) return;
 
-    fetchMyProfile(token)
+    fetchMyProfile()
       .then((user) =>
         setForm({
           username: user.username,
@@ -39,8 +39,8 @@ export function ProfileForm() {
         }),
       )
       .catch((err) => {
-        // A stale/expired token still passes ProfilePage's isAuthenticated check (it's
-        // just a non-empty string) but fails here on the backend - same fix as /pedidos
+        // An expired session still passes ProfilePage's isAuthenticated check (it only
+        // knows a profile is cached) but fails here on the backend - same fix as /pedidos
         // (see its page.tsx), clear the dead session instead of showing a stuck error.
         if (err instanceof ApiError && err.status === 401) {
           logout();
@@ -50,7 +50,7 @@ export function ProfileForm() {
         setError(err instanceof ApiError ? err.message : "Não foi possível carregar seu perfil.");
       })
       .finally(() => setLoading(false));
-  }, [token, logout, router]);
+  }, [isAuthenticated, logout, router]);
 
   function handleChange<K extends keyof UpdateProfileRequest>(field: K) {
     return (event: ChangeEvent<HTMLInputElement>) => {
@@ -61,13 +61,13 @@ export function ProfileForm() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!token || !form) return;
+    if (!isAuthenticated || !form) return;
 
     setError(null);
     setSuccess(false);
     setSaving(true);
     try {
-      const updated = await updateMyProfile(form, token);
+      const updated = await updateMyProfile(form);
       // Keeps the header ("Minha conta (nome)") and the greeting in the account menu in
       // sync with a changed name right away, without requiring a fresh login.
       updateUser({ fullName: updated.fullName, imageUrl: updated.imageUrl });

@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, bffFetch } from "@/lib/api/client";
 import type { ProductCategoryValue } from "@/lib/constants/categories";
 import type { PageResponse, ProductPayload, ProductResponse } from "@/lib/api/types";
 
@@ -64,25 +64,22 @@ export function fetchAllProductsForAdmin(): Promise<PageResponse<ProductResponse
   return fetchProducts({ page: 0, size: 100, sort: "name-asc" });
 }
 
-export function createProduct(payload: ProductPayload, token: string): Promise<ProductResponse> {
-  return apiFetch<ProductResponse>("/products", {
+export function createProduct(payload: ProductPayload): Promise<ProductResponse> {
+  return bffFetch<ProductResponse>("/products", {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 }
 
-export function updateProductAdmin(id: number, payload: ProductPayload, token: string): Promise<ProductResponse> {
-  return apiFetch<ProductResponse>(`/products/${id}`, {
+export function updateProductAdmin(id: number, payload: ProductPayload): Promise<ProductResponse> {
+  return bffFetch<ProductResponse>(`/products/${id}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 }
 
-export function deleteProduct(id: number, token: string): Promise<void> {
-  return apiFetch<void>(`/products/${id}`, {
+export function deleteProduct(id: number): Promise<void> {
+  return bffFetch<void>(`/products/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
   });
 }

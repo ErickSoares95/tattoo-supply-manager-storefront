@@ -6,16 +6,16 @@ import { reprocessNotifications } from "@/lib/api/notifications";
 import { useAuth } from "@/lib/store/AuthContext";
 
 export default function AdminNotificationsPage() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
   async function handleReprocess() {
-    if (!token) return;
+    if (!isAuthenticated) return;
     setStatus("loading");
     setError(null);
     try {
-      await reprocessNotifications(token);
+      await reprocessNotifications();
       setStatus("success");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Não foi possível reprocessar as notificações.");

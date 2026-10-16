@@ -83,8 +83,9 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  token: string;
+// The backend's LoginResponse minus the token: /api/auth/login keeps the JWT in an HttpOnly
+// cookie and returns only these profile fields to the browser.
+export interface SessionUser {
   userId: number;
   fullName: string;
   email: string;
