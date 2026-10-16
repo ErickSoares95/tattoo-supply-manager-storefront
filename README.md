@@ -66,15 +66,31 @@ CSS custom properties in `src/app/globals.css`, mapped into Tailwind via `@theme
 |---|---|
 | `NEXT_PUBLIC_API_BASE_URL` | Base URL of the Spring Boot backend (e.g. `https://tattoo-supply-manager.onrender.com`). Defaults to `http://localhost:8080` for local dev. |
 
-The backend's `CORS_ALLOWED_ORIGINS` needs this deployment's origin added before login/checkout/admin
-(anything that fetches client-side) will work cross-origin — server-rendered pages like `/produtos`
-aren't affected, since that fetch never leaves the Vercel server.
+Login and every authenticated call go through the storefront's own `/api/*` routes (see
+**Authentication** below), so they don't depend on CORS. The backend's `CORS_ALLOWED_ORIGINS` still
+needs this deployment's origin for the one call the browser makes directly (registration);
+server-rendered pages like `/produtos` aren't affected, since that fetch never leaves the Vercel server.
+
+## Authentication (BFF)
+
+The backend's JWT never reaches the browser's JavaScript, so an XSS bug can't steal it:
+
+- `POST /api/auth/login` calls the backend and stores the JWT in an **HttpOnly, SameSite=Lax**
+  cookie on the storefront's origin; the response body only carries the profile.
+- Client components call `/api/backend/<path>`, a same-origin proxy that adds
+  `Authorization: Bearer <jwt>` from the cookie and relays the backend's answer unchanged. It
+  rejects cross-origin POST/PUT/PATCH/DELETE and clears the cookie when the backend answers 401.
+- `POST /api/auth/logout` deletes the cookie.
+
+Why not a cookie set by the API itself: the storefront (`vercel.app`) and the API (`onrender.com`)
+are different sites, so that cookie would be third-party and blocked by modern browsers.
 
 ## Getting started
 
 ```bash
 npm install
 npm run dev
+npm test      # Vitest unit tests (BFF routes, api client, auth context)
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Needs the backend running (locally or pointed at
@@ -82,7 +98,7 @@ the deployed one via `NEXT_PUBLIC_API_BASE_URL`) for anything beyond the static 
 
 ## In the open
 
-- Home page's "Ofertas"/"Destaques" sections are still mock data (step 2 note above).
+- No E2E tests yet (Playwright would cover login → checkout → payment); unit tests cover the BFF.
 - No real payment gateway — checkout calls the backend's `payment` module, whose approval rule is
   deterministic for demo purposes, not wired to Pix/card.
 - Custom domain not set up yet — running on the default `.vercel.app` one.
