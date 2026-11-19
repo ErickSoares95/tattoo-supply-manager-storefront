@@ -54,6 +54,24 @@ describe("proxyToBackend", () => {
     expect(init.body).toBe(JSON.stringify({ items: [{ productId: 1, quantity: 2 }] }));
   });
 
+  it("forwards the checkout's Idempotency-Key and no other client header", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(backendResponse(201, { id: 7 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await proxyToBackend(
+      request("orders", {
+        method: "POST",
+        headers: { ...withSession, "content-type": "application/json", "idempotency-key": "k-1", "x-custom": "nope" },
+        body: "{}",
+      }),
+      ["orders"],
+    );
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers["Idempotency-Key"]).toBe("k-1");
+    expect(Object.keys(init.headers).sort()).toEqual(["Authorization", "Content-Type", "Idempotency-Key"]);
+  });
+
   it("rejects a state-changing request from another origin", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { OrderStatusBadge } from "@/components/order/OrderStatusBadge";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api/client";
@@ -74,7 +75,9 @@ export default function OrdersPage() {
               className="flex items-center justify-between rounded-lg border border-line bg-bg-card px-4 py-3.5 transition hover:border-gold-dark"
             >
               <div>
-                <p className="font-semibold text-cream">Pedido #{order.id}</p>
+                <p className="flex items-center gap-2 font-semibold text-cream">
+                  Pedido #{order.id} <OrderStatusBadge status={order.status} />
+                </p>
                 <p className="text-sm text-muted">
                   {new Date(order.creationDate).toLocaleString("pt-BR")} · {order.items.length} item(ns)
                 </p>

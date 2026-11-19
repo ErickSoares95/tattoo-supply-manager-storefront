@@ -133,11 +133,16 @@ export interface OrderItemResponse {
   subtotal: number;
 }
 
+// Order lifecycle on the backend (Order.status): unpaid orders are cancelled after 48h and
+// their stock goes back to the catalog.
+export type OrderStatus = "PENDING_PAYMENT" | "PAID" | "CANCELLED";
+
 export interface OrderResponse {
   id: number;
   userId: number;
   items: OrderItemResponse[];
   total: number;
+  status: OrderStatus;
   creationDate: string;
 }
 
@@ -148,7 +153,7 @@ export interface OrderResponse {
 // completeness (e.g. an admin paying a wrong amount via Postman).
 export type PaymentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
-export type PaymentMethod = "PIX" | "CREDIT_CARD" | "BOLETO";
+export type PaymentMethod = "PIX" | "CREDIT_CARD" | "DEBIT_CARD" | "BOLETO";
 
 // Matches PaymentRequest exactly - POST /orders/{orderId}/payments.
 export interface PaymentRequest {

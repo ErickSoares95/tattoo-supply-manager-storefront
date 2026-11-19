@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import { createOrder } from "@/lib/api/orders";
@@ -19,6 +19,12 @@ export function CartDrawer() {
 
   const [placing, setPlacing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idempotencyKey = useRef<string | null>(null);
+
+  // A different cart is a different order: never reuse the key of an earlier attempt for it.
+  useEffect(() => {
+    idempotencyKey.current = null;
+  }, [items]);
 
   // WAI-ARIA authoring practices for a modal dialog: Escape must dismiss it. role="dialog"
   // aria-modal="true" alone doesn't give this for free - the browser does nothing special
@@ -43,9 +49,14 @@ export function CartDrawer() {
     setPlacing(true);
 
     try {
+      // One key per checkout attempt: a retry of the same attempt (double click, flaky
+      // network) gets the same order back instead of a second one. Reset when the cart changes.
+      idempotencyKey.current ??= crypto.randomUUID();
       const order = await createOrder(
         items.map((item) => ({ productId: item.productId, quantity: item.quantity })),
+        idempotencyKey.current,
       );
+      idempotencyKey.current = null;
       clear();
       close();
       // Was: just an inline "Pedido realizado com sucesso!" that left the drawer open

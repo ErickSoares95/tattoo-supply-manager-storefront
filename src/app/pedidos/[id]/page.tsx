@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api/client";
-import { fetchOrderById } from "@/lib/api/orders";
+import { OrderStatusBadge } from "@/components/order/OrderStatusBadge";
+import { cancelOrder, fetchOrderById } from "@/lib/api/orders";
 import { createPayment, fetchOrderPayments } from "@/lib/api/payments";
 import type { OrderResponse, PaymentMethod, PaymentResponse } from "@/lib/api/types";
 import { formatBRL } from "@/lib/format";
@@ -81,7 +82,9 @@ export default function OrderDetailPage() {
       {order && (
         <>
           <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
-            <h1 className="font-serif text-3xl text-cream">Pedido #{order.id}</h1>
+            <h1 className="flex items-center gap-3 font-serif text-3xl text-cream">
+              Pedido #{order.id} <OrderStatusBadge status={order.status} />
+            </h1>
             <p className="text-sm text-muted">{new Date(order.creationDate).toLocaleString("pt-BR")}</p>
           </div>
 
@@ -107,13 +110,27 @@ export default function OrderDetailPage() {
             <span className="text-gold-light">{formatBRL(order.total)}</span>
           </div>
 
-          {payments && (
-            <PaymentSection
-              order={order}
-              payments={payments}
-              onPaid={(payment) => setPayments((prev) => [payment, ...(prev ?? [])])}
-              onAuthError={handleAuthError}
-            />
+          {order.status === "CANCELLED" ? (
+            <p className="mt-8 rounded-lg border border-line bg-bg-card p-5 text-sm text-muted">
+              Este pedido foi cancelado e os itens voltaram ao estoque. Pedidos não pagos são
+              cancelados automaticamente depois de 48 horas.
+            </p>
+          ) : (
+            payments && (
+              <PaymentSection
+                order={order}
+                payments={payments}
+                onPaid={(payment) => {
+                  setPayments((prev) => [payment, ...(prev ?? [])]);
+                  if (payment.status === "APPROVED") setOrder({ ...order, status: "PAID" });
+                }}
+                onAuthError={handleAuthError}
+              />
+            )
+          )}
+
+          {order.status === "PENDING_PAYMENT" && (
+            <CancelOrderButton orderId={order.id} onCancelled={setOrder} onAuthError={handleAuthError} />
           )}
         </>
       )}
@@ -124,8 +141,69 @@ export default function OrderDetailPage() {
 const METHOD_LABELS: Record<PaymentMethod, string> = {
   PIX: "Pix",
   CREDIT_CARD: "Cartão de crédito",
+  DEBIT_CARD: "Cartão de débito",
   BOLETO: "Boleto",
 };
+
+// Two clicks on purpose (no browser confirm dialog): cancelling gives the stock back and
+// can't be undone.
+function CancelOrderButton({
+  orderId,
+  onCancelled,
+  onAuthError,
+}: {
+  orderId: number;
+  onCancelled: (order: OrderResponse) => void;
+  onAuthError: (err: unknown) => boolean;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  async function handleCancel() {
+    setCancelError(null);
+    setCancelling(true);
+    try {
+      onCancelled(await cancelOrder(orderId));
+    } catch (err) {
+      if (onAuthError(err)) return;
+      setCancelError(
+        err instanceof ApiError && err.status === 409
+          ? "Este pedido não pode mais ser cancelado (já foi pago ou cancelado). Recarregue a página."
+          : "Não foi possível cancelar o pedido.",
+      );
+    } finally {
+      setCancelling(false);
+      setConfirming(false);
+    }
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      {confirming ? (
+        <>
+          <span className="text-sm text-muted">Cancelar o pedido e devolver os itens ao estoque?</span>
+          <button
+            type="button"
+            disabled={cancelling}
+            onClick={handleCancel}
+            className="rounded-full border border-danger px-4 py-2 text-sm font-semibold text-danger disabled:opacity-40"
+          >
+            {cancelling ? "Cancelando..." : "Confirmar cancelamento"}
+          </button>
+          <button type="button" onClick={() => setConfirming(false)} className="text-sm text-muted hover:text-cream">
+            Voltar
+          </button>
+        </>
+      ) : (
+        <button type="button" onClick={() => setConfirming(true)} className="text-sm text-muted underline hover:text-cream">
+          Cancelar pedido
+        </button>
+      )}
+      {cancelError && <p className="w-full text-sm text-danger">{cancelError}</p>}
+    </div>
+  );
+}
 
 function PaymentSection({
   order,

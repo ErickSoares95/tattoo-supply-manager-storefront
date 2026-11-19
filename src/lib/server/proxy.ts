@@ -45,6 +45,10 @@ export async function proxyToBackend(request: NextRequest, path: string[]): Prom
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": request.headers.get("content-type") ?? "application/json",
+      // Checkout's retry protection (POST /orders); the only client header forwarded.
+      ...(request.headers.get("idempotency-key")
+        ? { "Idempotency-Key": request.headers.get("idempotency-key") as string }
+        : {}),
     },
     body: SAFE_METHODS.has(request.method) ? undefined : await request.text(),
     cache: "no-store",
