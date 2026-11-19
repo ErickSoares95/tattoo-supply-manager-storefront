@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { CatalogLoading } from "@/components/shop/CatalogLoading";
 import { ProductCatalog } from "@/components/shop/ProductCatalog";
 
 export const metadata: Metadata = {
@@ -17,5 +19,9 @@ interface ProdutosPageProps {
 export default async function ProdutosPage({ searchParams }: ProdutosPageProps) {
   const params = await searchParams;
 
-  return <ProductCatalog searchParams={params} variant="standalone" />;
+  return (
+    <Suspense fallback={<CatalogLoading />}>
+      <ProductCatalog searchParams={params} variant="standalone" />
+    </Suspense>
+  );
 }

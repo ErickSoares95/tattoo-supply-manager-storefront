@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { CatalogLoading } from "@/components/shop/CatalogLoading";
 import { ProductCatalog } from "@/components/shop/ProductCatalog";
 
 interface HomeProps {
@@ -17,7 +19,10 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <>
       <HeroCarousel />
-      <ProductCatalog searchParams={params} variant="home" />
+      {/* Hero shows right away; the catalog streams in once the backend answers (it may be waking up). */}
+      <Suspense fallback={<CatalogLoading />}>
+        <ProductCatalog searchParams={params} variant="home" />
+      </Suspense>
     </>
   );
 }
