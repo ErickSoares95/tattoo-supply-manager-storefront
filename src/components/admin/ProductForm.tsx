@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import { createProduct, fetchProductById, updateProductAdmin } from "@/lib/api/products";
@@ -27,12 +27,13 @@ export function ProductForm({ productId }: { productId?: number }) {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Version of the copy being edited; sent back on save (see updateProductAdmin).
+  const [version, setVersion] = useState<number | null>(null);
+  const [stale, setStale] = useState(false);
 
-  useEffect(() => {
-    if (!productId) return;
-
-    fetchProductById(productId)
-      .then((product) =>
+  const loadProduct = useCallback((id: number) => {
+    return fetchProductById(id)
+      .then((product) => {
         setForm({
           name: product.name,
           description: product.description ?? "",
@@ -40,11 +41,18 @@ export function ProductForm({ productId }: { productId?: number }) {
           stock: product.stock,
           imageUrl: product.imageUrl ?? "",
           category: product.category,
-        }),
-      )
+        });
+        setVersion(product.version);
+        setStale(false);
+        setError(null);
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Não foi possível carregar o produto."))
       .finally(() => setLoading(false));
-  }, [productId]);
+  }, []);
+
+  useEffect(() => {
+    if (productId) loadProduct(productId);
+  }, [productId, loadProduct]);
 
   function handleChange(field: keyof ProductPayload) {
     return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -65,13 +73,21 @@ export function ProductForm({ productId }: { productId?: number }) {
     setSaving(true);
     try {
       if (isEditing) {
-        await updateProductAdmin(productId, form);
+        await updateProductAdmin(productId, form, version ?? 0);
       } else {
         await createProduct(form);
       }
       router.push("/admin/produtos");
       router.refresh();
     } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setStale(true);
+        setError(
+          "Este produto mudou depois que você abriu o formulário (por exemplo, uma venda baixou o estoque). " +
+            "Recarregue para ver os valores atuais antes de salvar.",
+        );
+        return;
+      }
       setError(err instanceof ApiError ? err.message : "Não foi possível salvar o produto.");
     } finally {
       setSaving(false);
@@ -156,7 +172,17 @@ export function ProductForm({ productId }: { productId?: number }) {
         </div>
       )}
 
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+
+      {stale && productId !== undefined && (
+        <button
+          type="button"
+          onClick={() => loadProduct(productId)}
+          className="self-start rounded-full border border-gold px-5 py-2 text-sm font-semibold text-gold hover:border-gold-light hover:text-gold-light"
+        >
+          Recarregar produto
+        </button>
+      )}
 
       <button
         type="submit"

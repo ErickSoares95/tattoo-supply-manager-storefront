@@ -71,10 +71,12 @@ export function createProduct(payload: ProductPayload): Promise<ProductResponse>
   });
 }
 
-export function updateProductAdmin(id: number, payload: ProductPayload): Promise<ProductResponse> {
+// `version` = the one the form loaded (ProductResponse.version); the backend answers 409
+// when the product changed since then.
+export function updateProductAdmin(id: number, payload: ProductPayload, version: number): Promise<ProductResponse> {
   return bffFetch<ProductResponse>(`/products/${id}`, {
     method: "PUT",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, version }),
   });
 }
 

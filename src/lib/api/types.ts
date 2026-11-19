@@ -21,6 +21,10 @@ export interface ProductResponse {
    * concept as the admin sales report, which requires an approved payment). Drives
    * "mais vendido" ordering on /produtos and "Destaques da loja" on the home page. */
   unitsSold: number;
+  /** Optimistic-lock version. The admin edit form sends it back on PUT, so saving a copy
+   * that went stale (an order sold stock meanwhile) is refused with 409 instead of
+   * overwriting that stock. */
+  version: number;
 }
 
 // Spring Data's Page<T> JSON shape.
