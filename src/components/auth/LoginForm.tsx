@@ -11,6 +11,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
+  const passwordChanged = searchParams.get("motivo") === "senha-alterada";
 
   const [loginValue, setLoginValue] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +26,11 @@ export function LoginForm() {
       await login({ login: loginValue, password });
       router.push(redirect ? `/${redirect}` : "/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
+      if (err instanceof ApiError && err.status === 429) {
+        setError("Muitas tentativas com senha errada. Aguarde 15 minutos e tente de novo.");
+      } else {
+        setError(err instanceof ApiError ? err.message : "Não foi possível entrar.");
+      }
     } finally {
       setLoading(false);
     }
@@ -33,6 +38,11 @@ export function LoginForm() {
 
   return (
     <>
+      {passwordChanged && (
+        <p role="status" className="mb-4 rounded-md border border-gold-dark bg-bg-card px-3 py-2 text-sm text-gold-light">
+          Senha alterada. Entre de novo com a nova senha.
+        </p>
+      )}
       {redirect === "carrinho" && (
         <p className="mb-4 rounded-md border border-gold-dark bg-bg-card px-3 py-2 text-sm text-gold-light">
           Faça login pra finalizar sua compra.

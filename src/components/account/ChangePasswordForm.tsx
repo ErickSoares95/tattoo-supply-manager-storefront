@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api/client";
 import { changeMyPassword } from "@/lib/api/users";
 import { useAuth } from "@/lib/store/AuthContext";
@@ -13,21 +14,20 @@ const FIELD_CLASS =
 // UpdateProfileRequest) and its own failure mode (wrong current password), so mixing it
 // into the profile form's single save button would blur two independent operations.
 export function ChangePasswordForm() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const router = useRouter();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!isAuthenticated) return;
 
     setError(null);
-    setSuccess(false);
 
     if (newPassword !== confirmPassword) {
       setError("A confirmação não bate com a nova senha.");
@@ -37,10 +37,10 @@ export function ChangePasswordForm() {
     setSaving(true);
     try {
       await changeMyPassword({ currentPassword, newPassword });
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      setSuccess(true);
+      // The backend refuses every token issued before a password change, this session's
+      // included, so end it here and ask for a login with the new password.
+      logout();
+      router.push("/login?motivo=senha-alterada");
     } catch (err) {
       // Most likely InvalidCurrentPasswordException (403) if currentPassword is wrong.
       setError(err instanceof ApiError ? err.message : "Não foi possível trocar sua senha.");
@@ -58,7 +58,6 @@ export function ChangePasswordForm() {
           required
           value={currentPassword}
           onChange={(e) => {
-            setSuccess(false);
             setCurrentPassword(e.target.value);
           }}
           className={FIELD_CLASS}
@@ -73,7 +72,6 @@ export function ChangePasswordForm() {
           minLength={8}
           value={newPassword}
           onChange={(e) => {
-            setSuccess(false);
             setNewPassword(e.target.value);
           }}
           className={FIELD_CLASS}
@@ -88,7 +86,6 @@ export function ChangePasswordForm() {
           minLength={8}
           value={confirmPassword}
           onChange={(e) => {
-            setSuccess(false);
             setConfirmPassword(e.target.value);
           }}
           className={FIELD_CLASS}
@@ -96,7 +93,6 @@ export function ChangePasswordForm() {
       </label>
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {success && <p className="text-sm text-gold-light">Senha alterada com sucesso.</p>}
 
       <button
         type="submit"
